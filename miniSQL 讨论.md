@@ -27,7 +27,7 @@
 
    - 确定各个构造块的责任：30 分钟
 
-     - Interpreter 检查语法性的错误，产生`class Operation`，与 catalog manager 交互，根据 API 返回值显示查询结果
+     - Interpreter 检查语法性的错误，产生`class Operation`，与 catalog manager 交互，调用 API
      - API 根据 `class Operation` 调用各种 manager 的接口
 
    - 确定各个构造块的通信规则：TODO
