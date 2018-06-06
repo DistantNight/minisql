@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="API.h">
+    <ClInclude Include="include\API.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="OperationInput.h">
+    <ClInclude Include="include\OperationInput.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
