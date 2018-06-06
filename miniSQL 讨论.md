@@ -34,12 +34,6 @@
 
    - 确定主要的类：TODO: 负责 API 的人需要定义通信类
 
-     ```c++
-     class Operation {}; // for interpreter 
-     class Table {}; // catalog manager, interpreter
-
-     ```
-
    - 确定错误处理方式：使用异常（参考 C++ Primer 18.1）
 
 
@@ -47,9 +41,9 @@
 
    - API and Interpreter：范佳晨
    - Buffer Manager and DB Files: 曾辉
-   - Index Manager and record manager: 闫徐天任
+   - Index Manager: 赵丰年
    - Catalog Manager：吕明远
-   - 整合：赵丰年
+   - 整合 and record manager：闫徐天任
 
 5. 约定集成工序：自己进行单元测试，文件直接提交到 master 分支
 
