@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
-using namespace std;
+using namespace std; // TODO: Do NOT using namespace in head file
 #define COLUMNMAXSIZE 32 
 
 typedef enum COLUMNTYPE
@@ -33,10 +33,10 @@ public:
 	bool is_unique[COLUMNMAXSIZE];
 	string primary_key;
 	int exist_index_num;
-	vector<string> esist_index_name;
+	vector<string> exist_index_name;
 public:
-	Table();
-	~Table();
+	//Table();
+	//~Table();
 };
 
 /*
@@ -108,8 +108,8 @@ public:
 	string row_value[COLUMNMAXSIZE];
 	int value_num;
 public:
-	Insert();
-	~Insert();
+	//Insert();
+	//~Insert();
 };
 
 /*
@@ -128,8 +128,8 @@ public:
 	vector<string> condition_op;
 	vector<string> condition_value;
 public:
-	Delete();
-	~Delete();
+	//Delete();
+	//~Delete();
 
 };
 
@@ -143,14 +143,14 @@ public:
 */
 class Select :public Table
 {
-private:
+public:
 	int condition_num;
 	vector<string> condition_name;
 	vector<string> condition_op;
 	vector<string> condition_value;
 public:
-	Select();
-	~Select();
+	//Select();
+	//~Select();
 };
 
 

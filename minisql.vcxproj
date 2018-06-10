@@ -21,6 +21,11 @@
   <ItemGroup>
     <ClInclude Include="include\API.h" />
     <ClInclude Include="include\OperationInput.h" />
+    <ClInclude Include="include\Serialize.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="source\RecordManager.cpp" />
+    <ClCompile Include="source\Serialize.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
