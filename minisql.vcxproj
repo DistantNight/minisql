@@ -25,6 +25,7 @@
     <ClInclude Include="include\Serialize.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="source\RecordManager.cpp" />
     <ClCompile Include="source\Serialize.cpp" />
   </ItemGroup>

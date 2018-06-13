@@ -8,28 +8,70 @@ using std::string;
 
 const int32_t MAX_FILE_ACTIVE = 5;	// limit the acctive files in the buffer
 const int32_t MAX_BLOCK = 40;		// the max number of the blocks
+const int32_t BLOCK_LEN = 4096;		// the size of one block
+
+class Buffer;
+class blockInfo;
 
 struct fileInfo {
 	bool type;				// 0-> data file， 1 -> index file
-	string fileName;		// the name of the file
+	string file_name;		// the name of the file
 	bool lock;				// prevent the block from replacing
 	fileInfo *next;			// the pointer points to the next file
-	blockInfo *firstBlock;	// point to the first block within the file
+	blockInfo *first_block;	// point to the first block within the file
+
+	friend class Buffer;
+
+	fileInfo(string file_name, bool type) :
+		file_name(file_name),
+		type(type),
+		lock(0),
+		next(NULL),
+		first_block(NULL) {}
 };
 
 struct blockInfo
 {
-	int32_t blockNum;	// the block number of the block which indicate it when it was built
+	int32_t block_num;	// the block number of the block which indicate it when it was built
 	bool lock;			// prevent the block from replacing
 	fileInfo* file;		// the pointer point to the file, which the block belong to
 
+	friend class Buffer;
+
+	blockInfo(int32_t block_num, fileInfo* file) :
+		block_num(block_num),
+		lock(0),
+		file(file), 
+		dirty(0),
+		next(NULL),
+		char_num(0) {
+		cBlock = new char[BLOCK_LEN];
+	}
+
+	void block_reset(int32_t block_num, fileInfo* file); // reset block
+	
+	~blockInfo() {
+		delete[] cBlock;
+	}
+
 private:
-	bool dirtyBit;		// 0 -> false, 1 -> indicate dirty. write back
+	bool dirty;			// 0 -> false, 1 -> indicate dirty. write back
 	blockInfo* next;	// the pointer point to next block
 	blockInfo* pre;		// the pointer point to pre block
-	int32_t charNum;	// the number of chars int the block
-	int8_t *cBlock;		// the array space for storing the records in the block in buffer
-	int32_t iTime;		// it indicate the age of the block in use
+	int32_t char_num;	// the number of chars int the block
+	char *cBlock;		// the array space for storing the records in the block in buffer
+};
+
+template<typename T> struct blockList		// for LRU
+{
+	T* element;
+	blockList* next;
+
+	friend class Buffer;
+
+	blockList() :
+		next(NULL),
+		element(NULL) {}
 };
 
 class Buffer {
@@ -37,48 +79,52 @@ class Buffer {
 private:
 	fileInfo * file_handle;
 	blockInfo * block_handle;
+	blockList<blockInfo> * LRU_block_list;
+	blockList<fileInfo> * LRU_file_list;
 
 	int32_t total_block;
 	int32_t total_file;
 
 	/*
 	function:
-		从现已分配的内存单元中获取用于替换的内存块
-		blockHandle -> LRU
+		读取磁盘数据到block
 	@param:
+		block_node: 存放数据的内存块
+		file_type: 文件类型 0->record, 1->index
+		file_name: 磁盘文件名
 	*/
-	blockInfo*	findBlock();
+	void load_data(string file_name, bool file_type, blockInfo* block_node);
 
 	/*
 	function:
-		将m_blockInfo所指向的块连接到文件头指针m_fileInfo所指向的块链表的结尾
-		将m_blockInfo所指向的块的file指针指向m_fileInfo
+		将block中的脏数据写回磁盘
 	@param:
-		m_fileInfo:文件信息
-		m_blockInfo:块信息
+		block_node: 存放数据的内存块
+		file_type: 文件类型 0->record, 1->index
+		file_name: 磁盘文件名
 	*/
-	void replace(fileInfo* m_fileInfo, blockInfo* m_blockInfo);
+	void write_back(string file_name, bool file_type, blockInfo* block_node);
 
 	/*
 	function:
-	读取表文件信息
-	@param:
-		Table_Name: 表名
+		关闭文件
+		将脏块数据写回磁盘
+		内存块链入垃圾链表
+		从LRU_block_list与LRU_file_list中剔除相应值
+	@param
+		file_node: 待关闭的文件头
 	*/
-	void get_table_info(string Table_Name); 
-
-
-	/*
-	function:
-		读取表文件信息
-	@param:
-		Index_Name: 表名
-	*/
-	void get_index_info(string Index_Name);
+	void close_file(fileInfo* file_node);
 
 public:
 
-	const int32_t BLOCK_LEN = 4096;		// the size of one block
+	Buffer() :
+		block_handle(NULL),
+		file_handle(NULL),
+		total_block(0),
+		total_file(0) {};
+
+	~Buffer();
 
 	/*
 	function:
@@ -87,17 +133,17 @@ public:
 		file_Name: 文件名
 		m_fileType: 文件类型
 	*/
-	fileInfo* get_file_Info(string file_Name, bool m_fileType);
+	fileInfo* get_file_info(string file_name, bool file_type);
 
 	/*
 	function:
 		根据文件名，文件类型查找该文件是否存在内存，返回块指针
 	@param:
-		Table_Name: 表名
-		fileType: 文件类型
-		blockNum: 块号
+		file_Name: 文件名
+		fileType: 文件类型 0->data, 1->index
+		block_num: 块号, 编号从0开始
 	*/
-	blockInfo* get_file_block(string file_Name, int fileType, int blockNum);
+	blockInfo* get_file_block(string file_name, bool file_type, int block_num); //
 
 	/*
 	function:
@@ -106,7 +152,7 @@ public:
 		file_node: 文件头指针
 		lock: 0->unlock, 1->lock
 	*/
-	void set_lock(fileInfo &file_node, bool lock);
+	void set_lock(fileInfo *file_node, bool lock);
 
 	/*
 	function:
@@ -115,7 +161,7 @@ public:
 		block_node: 块指针
 		lock: 0->unlock, 1->lock
 	*/
-	void set_lock(blockInfo &block_node, bool lock);
+	void set_lock(blockInfo *block_node, bool lock);
 
 	/*
 	function:
@@ -124,7 +170,7 @@ public:
 		block_node: 块指针
 		dirty: 1->dirty, 0->clean
 	*/
-	void set_dirty(blockInfo &block_node, bool dirty);
+	void set_dirty(blockInfo *block_node, bool dirty);
 	
 	/*
 	function:
@@ -132,7 +178,7 @@ public:
 	@param:
 		block_node: 块指针
 	*/
-	int8_t* get_content(blockInfo &block_node);
+	char* get_content(blockInfo *block_node);
 };
 
 #endif
