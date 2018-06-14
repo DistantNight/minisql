@@ -13,7 +13,7 @@ const int32_t BLOCK_LEN = 4096;		// the size of one block
 class Buffer;
 class blockInfo;
 
-struct fileInfo {
+class fileInfo {
 	bool type;				// 0-> data file£¬ 1 -> index file
 	string file_name;		// the name of the file
 	bool lock;				// prevent the block from replacing
@@ -30,8 +30,7 @@ struct fileInfo {
 		first_block(NULL) {}
 };
 
-struct blockInfo
-{
+class blockInfo {
 	int32_t block_num;	// the block number of the block which indicate it when it was built
 	bool lock;			// prevent the block from replacing
 	fileInfo* file;		// the pointer point to the file, which the block belong to
@@ -57,7 +56,6 @@ struct blockInfo
 private:
 	bool dirty;			// 0 -> false, 1 -> indicate dirty. write back
 	blockInfo* next;	// the pointer point to next block
-	blockInfo* pre;		// the pointer point to pre block
 	int32_t char_num;	// the number of chars int the block
 	char *cBlock;		// the array space for storing the records in the block in buffer
 };
@@ -119,10 +117,21 @@ private:
 public:
 
 	Buffer() :
-		block_handle(NULL),
-		file_handle(NULL),
 		total_block(0),
-		total_file(0) {};
+		total_file(0) {
+		
+		file_handle = new fileInfo("", 0);
+		file_handle->lock = 1;
+		block_handle = new blockInfo(-1, file_handle);
+		block_handle->lock = 1;
+		
+		LRU_block_list = new blockList<blockInfo>;
+		LRU_file_list = new blockList<fileInfo>;
+		LRU_block_list->element = block_handle;
+		LRU_block_list->next = NULL;
+		LRU_file_list->element = file_handle;
+		LRU_file_list->next = NULL;
+	};
 
 	~Buffer();
 

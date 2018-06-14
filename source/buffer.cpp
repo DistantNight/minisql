@@ -4,7 +4,7 @@
 
 using std::fstream;
 using std::ios;
-const string ROOT = "../data/";
+const string ROOT = "./data/";
 
 void blockInfo::block_reset(int32_t block_num, fileInfo* file) {
 	this->block_num = block_num;
@@ -21,7 +21,7 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 	fileInfo* iter = NULL;
 
 	for (iter = file_handle; iter; iter = iter->next) {
-		if (file_handle->file_name == file_name) {
+		if (iter->file_name == file_name) {
 			break;
 		}
 		file_pre = iter;
@@ -38,7 +38,7 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 			//更新LRU_file_list
 			temp->next = new blockList<fileInfo>;
 			temp->next->element = iter;
-			temp->next = NULL;
+			temp->next->next = NULL;
 
 			total_file++;
 		}
@@ -65,6 +65,21 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 			LRU_cur->next = NULL;
 		}
 	}
+	else {
+		//文件在内存
+		blockList<fileInfo>* LRU_pre = NULL;
+		blockList<fileInfo>* LRU_cur = NULL;
+		for (LRU_cur = LRU_file_list; LRU_cur; LRU_cur = LRU_cur->next) {
+			if (LRU_cur->element->file_name == file_name)
+				break;
+			LRU_pre = LRU_cur;
+		}
+		if (LRU_cur != temp) {
+			LRU_pre->next = LRU_cur->next;
+			temp->next = LRU_cur;
+			LRU_cur->next = NULL;
+		}
+	}
 
 	return iter;
 }
@@ -85,29 +100,38 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 	for (temp = LRU_block_list; temp->next; temp = temp->next);
 
 	if (!iter) { //块未在内存
-		if (block_handle) {//垃圾链表中有块
-			block_handle->block_reset(block_num, file_node);
-			iter = block_handle;
+		if (block_handle->next) {//垃圾链表中有块
+			block_handle->next->block_reset(block_num, file_node);
+			iter = block_handle->next;
 
 			//将垃圾链表中的块添加到file_node块链表中
-			block_pre->next = block_handle;
-			block_handle = block_handle->next;
-			block_pre->next->next = NULL;
+			if (!block_pre) {
+				file_node->first_block = iter;
+				block_handle->next = iter->next;
+				file_node->first_block->next = NULL;
+			}
+			else {
+				block_pre->next = iter;
+				block_handle->next = iter->next;
+				block_pre->next->next = NULL;
+			}
 
 			//更新LRU_block_list
 			temp->next = new blockList<blockInfo>;
-			temp->next->element = block_pre->next;
+			temp->next->element = iter;
 			temp->next->next = NULL;
 
 		}
 		else {
 			if (total_block < MAX_BLOCK) { //可以新建块
-				block_pre->next = new blockInfo(block_num, file_node);
-				iter = block_pre->next;
-
+				iter = new blockInfo(block_num, file_node);
+				if (block_pre)
+					block_pre->next = iter;
+				else
+					file_node->first_block = iter;
 				//更新LRU_block_list
 				temp->next = new blockList<blockInfo>;
-				temp->next->element = block_pre->next;
+				temp->next->element = iter;
 				temp->next->next = NULL;
 
 				total_block++;
@@ -126,26 +150,35 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 				}
 				iter = LRU_cur->element;
 
-				blockInfo* replace_block_pre = NULL; //修改被替换文件中的链表
-				for (blockInfo* replace_block = iter->file->first_block; replace_block; replace_block = replace_block->next) {
+				blockInfo* replace_block_pre = iter->file->first_block; //修改被替换文件中的链表
+				blockInfo* replace_block = NULL;
+				for (replace_block = iter->file->first_block; replace_block; replace_block = replace_block->next) {
 					if (replace_block == iter)
 						break;
 					replace_block_pre = replace_block;
 				}
-				replace_block_pre->next = replace_block_pre->next->next;
+				if (replace_block_pre == replace_block)
+					iter->file->first_block = replace_block->next;
+				else
+					replace_block_pre->next = replace_block->next;
+				
 				if (iter->dirty) { //脏数据回写
 					write_back(iter->file->file_name, iter->file->type, iter);
 				}
 
 				iter->block_reset(block_num, file_node);
-				block_pre->next = iter;
-
+				if (block_pre)
+					block_pre->next = iter;
+				else
+					file_node->first_block = iter;
+				iter->next = NULL;
 				//更新LRU_block_list
 				temp->next = LRU_cur;
 				LRU_pre->next = LRU_cur->next;
 				LRU_cur->next = NULL;
 			}
 		}
+		load_data(file_name, file_type, iter);
 	}
 	else { //块在内存
 		//更新LRU_block_list
@@ -156,21 +189,22 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 				break;
 			LRU_pre = LRU_cur;
 		}
-		LRU_pre->next = LRU_cur->next;
-		temp->next = LRU_cur;
-		LRU_cur->next = NULL;
+		if (LRU_cur != temp) {
+			LRU_pre->next = LRU_cur->next;
+			temp->next = LRU_cur;
+			LRU_cur->next = NULL;
+		}
 	}
 	
 	//读取磁盘数据到iter
-
-	load_data(file_name, file_type, iter);
 	return iter;
 }
 
 void Buffer::load_data(string file_name, bool file_type, blockInfo* block_node) {
 	fstream file;
 	file.open(ROOT + (file_type ? "index/" : "record/") + file_name, ios::in|ios::out|ios::binary);
-
+	if (!file.good())
+		file.close();
 	file.seekg(block_node->block_num * BLOCK_LEN, ios::beg);
 	file.read(block_node->cBlock, BLOCK_LEN);
 	
@@ -183,18 +217,18 @@ void Buffer::close_file(fileInfo* file_node) {
 			write_back(file_node->file_name, file_node->type, iter);
 		}
 		//更新LRU链表
-		blockList<blockInfo>* temp = NULL, *LRU_pre = NULL;
+		blockList<blockInfo>* temp = NULL, *LRU_pre = LRU_block_list;
 		for (temp = LRU_block_list; temp; temp = temp->next) {
-			if (temp->element == iter)
+			if (temp->element->block_num == iter->block_num && temp->element->file == iter->file)
 				break;
 			LRU_pre = temp;
 		}
 		LRU_pre->next = temp->next;
-		//内存块加入垃圾链表
-		temp->element->next = block_handle->next;
-		block_handle->next = temp->element;
 		delete temp;
 	}
+	blockInfo* iter = NULL;
+	for (iter = block_handle; iter->next; iter = iter->next);
+	iter->next = file_node->first_block;
 }
 
 void Buffer::write_back(string file_name, bool file_type, blockInfo* block_node) {
