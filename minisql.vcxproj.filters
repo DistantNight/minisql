@@ -27,6 +27,9 @@
     <ClInclude Include="include\Serialize.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\RecordManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp">
@@ -38,7 +41,7 @@
     <ClCompile Include="source\Serialize.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="test\integration_test_buffer_and_record_manager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

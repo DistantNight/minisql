@@ -22,12 +22,13 @@
     <ClInclude Include="include\API.h" />
     <ClInclude Include="include\buffer.h" />
     <ClInclude Include="include\OperationInput.h" />
+    <ClInclude Include="include\RecordManager.h" />
     <ClInclude Include="include\Serialize.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="source\RecordManager.cpp" />
     <ClCompile Include="source\Serialize.cpp" />
+    <ClCompile Include="test\integration_test_buffer_and_record_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp" />
@@ -84,8 +85,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>include;$(IncludePath)</IncludePath>
-    <SourcePath>source;$(SourcePath)</SourcePath>
+    <IncludePath>$(ProjectDir)include;$(IncludePath)</IncludePath>
+    <SourcePath>$(ProjectDir)source;$(ProjectDir);$(SourcePath)</SourcePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
