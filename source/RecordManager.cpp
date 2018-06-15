@@ -244,6 +244,12 @@ bool RecordManager::tupleDeleted(int tuple_i) const
     return reading_position[0] == 0;
 }
 
+void RecordManager::lazyDeleteTuple(int tuple_i) const
+{
+    const auto reading_position = begin() + tuple_i * tuple_size;
+    reading_position[0] = 0;
+}
+
 void RecordManager::tellBufferPageHasChanged() const
 {
     database->set_dirty(database->get_file_block(table_.table_name, false, current_page_index_), true);
@@ -261,7 +267,7 @@ bool RecordManager::passUniqueConstraintTest(const Insert& table, const RecordMa
         auto result = r.getTuple(i);
         for (int j = 0 ; j < table.column_num; ++j)
         {
-            if (table.is_unique[j] && result.at(i) == table.row_value[i]) // should be unique, but insert same string
+            if (table.is_unique[j] && result.at(j) == table.row_value[j]) // should be unique, but insert same string
             {
                 return false;
             }
@@ -413,9 +419,10 @@ string recordExecute(Select &table)
         {
             bool meet_conditions = true;
             // auto read_here = reading_positon;
-            if (reading_positon[0] == 0) // deleted
+            if (r.tupleDeleted(tuple_i)) // deleted
             {
                 reading_positon += r.tuple_size;
+                ++tuple_i;
                 continue;
             }
             auto tuple = r.getTuple(tuple_i);
@@ -531,15 +538,16 @@ string recordExecute(Delete &table) // delete
         {
             break;
         }
-        int8_t *reading_positon = r.begin(); // read the memory from here
+        const int8_t *reading_positon = r.begin(); // read the memory from here
         int tuple_i = 0;
         while (reading_positon < r.end()) // !eof
         {
             bool meet_conditions = true;
             // auto read_here = reading_positon;
-            if (reading_positon[0] == 0) // deleted
+            if (r.tupleDeleted(tuple_i)) // deleted
             {
                 reading_positon += r.tuple_size;
+                ++tuple_i;
                 continue;
             }
             auto tuple = r.getTuple(tuple_i);
@@ -575,9 +583,10 @@ string recordExecute(Delete &table) // delete
                 }
             }
 
-            if (meet_conditions) // this tuple will be showed in the query result
+            if (meet_conditions) // this tuple will deleted
             {
-                reading_positon[0] = 0; // delete the tuple
+               // delete the tuple
+                r.lazyDeleteTuple(tuple_i);
                 ++result_tuple_num;
             }
             reading_positon += r.tuple_size;
