@@ -28,6 +28,7 @@
   <ItemGroup>
     <ClCompile Include="source\RecordManager.cpp" />
     <ClCompile Include="source\Serialize.cpp" />
+    <ClCompile Include="test\unit_test_buffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp" />

@@ -41,5 +41,8 @@
     <ClCompile Include="source\Serialize.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="test\unit_test_buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

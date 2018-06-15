@@ -1,6 +1,7 @@
 #include "buffer.h"
 #include <fstream>
 #include <cstdlib>
+#include <stdexcept>
 
 using std::fstream;
 using std::ios;
@@ -49,8 +50,7 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 				LRU_pre = LRU_cur;
 				LRU_cur = LRU_cur->next;
 				if (!LRU_cur) {
-					//所有文件都lock了
-					//抛出异常
+					throw std::logic_error("all active files are locked, cannot open a new file");
 				}
 			}
 			iter = LRU_cur->element;
@@ -144,8 +144,7 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 					LRU_pre = LRU_cur;
 					LRU_cur = LRU_cur->next;
 					if (!LRU_cur) {
-						//所有块都lock了
-						//抛出异常
+						throw std::logic_error("all blocks in the memory are locked, cannot get a new block");
 					}
 				}
 				iter = LRU_cur->element;
