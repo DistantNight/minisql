@@ -202,11 +202,16 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 
 void Buffer::load_data(string file_name, bool file_type, blockInfo* block_node) {
 	fstream file;
-	file.open(ROOT + (file_type ? "index/" : "record/") + file_name, ios::in|ios::out|ios::binary);
-	file.seekg(block_node->block_num * BLOCK_LEN, ios::beg);
-	file.read(block_node->cBlock, BLOCK_LEN);
-	
-	file.close();
+	if (block_node->block_num == 0)
+		file.open(ROOT + (file_type ? "index/" : "record/") + file_name, ios::in | ios::out | ios::binary | ios::app);
+	else
+		file.open(ROOT + (file_type ? "index/" : "record/") + file_name, ios::in | ios::out | ios::binary);
+	if (file.is_open()) {
+		file.seekg(block_node->block_num * BLOCK_LEN, ios::beg);
+		file.read(block_node->cBlock, BLOCK_LEN);
+
+		file.close();
+	}
 }
 
 void Buffer::close_file(fileInfo* file_node) {

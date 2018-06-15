@@ -23,6 +23,13 @@ int main()
 		buffer[3] = '4';
 		buffer[2] = '3';
 	}
-	system("pause");
+	//²âÊÔĞÂ¿ªÄÚ´æ¿é
+	blocks[2] = database.get_file_block("test", 0, 2);
+	buffer = database.get_content(blocks[2]);
+	database.set_dirty(blocks[2], 1);
+	buffer[3] = 'A';
+	buffer[4] = ' ';
+	buffer[5] = 'T';
+//	system("pause");
 	return 0;
 }

@@ -45,6 +45,7 @@ class blockInfo {
 		next(NULL),
 		char_num(0) {
 		cBlock = new char[BLOCK_LEN];
+		memset(cBlock, 0, BLOCK_LEN);
 	}
 
 	void block_reset(int32_t block_num, fileInfo* file); // reset block
