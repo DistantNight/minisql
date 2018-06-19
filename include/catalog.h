@@ -57,12 +57,12 @@ public:
 	
 	
 	bool createIndex(string nameOfIndex, string tableOfIndex, string keyOfIndex);
-	bool deleteIndex(string nameOfIndex);
-	bool numberOfRecordAdd(string nameOfTable, int a);
+	bool deleteIndex(const string& nameOfIndex);
+	bool numberOfRecordAdd(const string& nameOfTable, int a);
 	
 	bool dropTable(string nameOfTable);
-	bool updateCatalog();
-	int getFullLength(string nameOfTable);
+	bool updateCatalog(); // TODO: execute before quit
+	int getFullLength(const string& nameOfTable);
 	int getRecordNum(string tableName);
 	int getLength(vector<string> x);
 	int getLength(string type);

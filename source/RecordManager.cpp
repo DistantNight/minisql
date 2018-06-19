@@ -606,3 +606,37 @@ string recordExecute(Delete &table) // delete
     return deleting_result.str();
 }
 
+bool recordExecute(DropTable &t)
+{
+    return true;
+}
+
+bool indexExecute(CreateTable& table)
+{
+    return true;
+}
+
+bool indexExecute(DropTable& table)
+{
+    return true;
+}
+
+string indexExecute(CreateIndex& table)
+{
+    return "Create index successfully";
+}
+
+string indexExecute(DropIndex& table)
+{
+    return "Drop index successfully";
+}
+
+bool indexExecute(Insert& table)
+{
+    return true;
+}
+
+bool indexExecute(Delete& table)
+{
+    return true;
+}

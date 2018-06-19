@@ -18,7 +18,7 @@ class RecordManager {
 
 public:
     int tuple_size = 0;
-    map<string, int> column_name_to_index;
+    std::map<string, int> column_name_to_index;
     RecordManager(const Table &table);
 
     bool isEmptyPage() const;

@@ -1119,12 +1119,12 @@ int dropConvert(string &sql)
 int dropTableConvert(string &sql)
 {
 	int opt = 2;
-	int pos_space, pos_end, pos;
+	int pos;
 	string temp;
 	DropTable DT;
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
+	auto pos_space = sql.find(' ');
+	auto pos_end = sql.find(';');
 	if (pos_space < 0)
 	{
 		temp = sql.substr(0, pos_end);

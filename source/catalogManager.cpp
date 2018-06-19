@@ -10,28 +10,30 @@ extern catalogManager x;
 bool getTableInfo(Table & a) {
 
 	x.myprint(a.table_name);
+    return true;
 }
+
 string catalogExecute(CreateTable & b) {
 	vector<string> colname;
-	for (int i = 0; i < b.column_name->length; i++) {
+	for (unsigned long long i = 0; i < b.column_name->length(); i++) {
 		colname.push_back(b.column_name[i]);
 	}
 	vector<string> coltype;
 	for (int i = 0; i < b.column_num; i++) {
 		//coltype.push_back(b.column_type[i]);
 		if (b.column_type[i] == INT) {
-			coltype.push_back("int");
+			coltype.emplace_back("int");
 		}
 		else if (b.column_type[i] == CHAR) {
-			coltype.push_back("char");
+			coltype.emplace_back("char");
 		}
 		else if (b.column_type[i] == FLOAT) {
-			coltype.push_back("float");
+			coltype.emplace_back("float");
 		}
 	}
 	vector<int> isU;
 	for (int i = 0; i < b.column_num; i++) {
-		isU[i] = (int)b.is_unique[i];
+		isU[i] = static_cast<int>(b.is_unique[i]);
 	}
 	bool j = x.createTable(b.table_name, colname, coltype, isU, b.primary_key);
 	if (j == 0) {
