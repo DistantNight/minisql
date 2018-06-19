@@ -30,6 +30,9 @@
     <ClInclude Include="include\RecordManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\InputProcess.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp">
@@ -42,6 +45,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="test\unit_test_buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\OperationInput.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\API.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\InputProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

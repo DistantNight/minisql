@@ -21,11 +21,15 @@
   <ItemGroup>
     <ClInclude Include="include\API.h" />
     <ClInclude Include="include\buffer.h" />
+    <ClInclude Include="include\InputProcess.h" />
     <ClInclude Include="include\OperationInput.h" />
     <ClInclude Include="include\RecordManager.h" />
     <ClInclude Include="include\Serialize.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\API.cpp" />
+    <ClCompile Include="source\InputProcess.cpp" />
+    <ClCompile Include="source\OperationInput.cpp" />
     <ClCompile Include="source\RecordManager.cpp" />
     <ClCompile Include="source\Serialize.cpp" />
     <ClCompile Include="test\unit_test_buffer.cpp" />
