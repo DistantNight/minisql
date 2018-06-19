@@ -30,6 +30,15 @@
     <ClInclude Include="include\RecordManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\BPTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\catalog.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="include\index.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp">
@@ -42,6 +51,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="test\unit_test_buffer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\catalog.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\catalogManager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\index.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
