@@ -62,7 +62,7 @@ public:
 * name : DropTable
 * @para :
 */
-class DropTable
+class DropTable: public Table
 {
 public:
 	DropTable()

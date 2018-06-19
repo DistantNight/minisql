@@ -103,11 +103,7 @@ int sqlConvert(string &sql)
 	if (pos_space < 0)
 	{
 		temp = sql.substr(0, pos_end);
-		if (temp == lag_execfile)
-		{
-
-		}
-		else if (temp == lag_quit)
+		if (temp == lag_quit)
 		{
 			opt = 60;
 		}
@@ -272,8 +268,11 @@ int createIndexConvert(string &sql)
 							CI.index_column_name = temp;
 							if (sql[0] == ';')
 							{
-								catalogExecute(CI);
-								indexExecute(CI);
+								if (true == catalogExecute(CI))
+								{
+									temp = indexExecute(CI);
+									cout << temp << endl;
+								}			
 							}
 							else
 							{
@@ -311,8 +310,11 @@ int createIndexConvert(string &sql)
 										CI.index_column_name = temp;
 										if (sql[0] == ';')
 										{
-											catalogExecute(CI);
-											indexExecute(CI);
+											if (true == catalogExecute(CI))
+											{
+												temp = indexExecute(CI);
+												cout << temp << endl;
+											}
 										}
 										else
 										{
@@ -331,8 +333,11 @@ int createIndexConvert(string &sql)
 
 											if (sql[0] == ';')
 											{
-												catalogExecute(CI);
-												indexExecute(CI);
+												if (true == catalogExecute(CI))
+												{
+													temp = indexExecute(CI);
+													cout << temp << endl;
+												}
 											}
 											else
 											{
@@ -353,8 +358,11 @@ int createIndexConvert(string &sql)
 												removeSpace(sql);
 												if (sql[0] == ';')
 												{
-													catalogExecute(CI);
-													indexExecute(CI);
+													if (true == catalogExecute(CI))
+													{
+														temp = indexExecute(CI);
+														cout << temp << endl;
+													}
 												}
 												else
 												{
@@ -402,8 +410,11 @@ int createIndexConvert(string &sql)
 
 									if (sql[0] == ';')
 									{
-										catalogExecute(CI);
-										indexExecute(CI);
+										if (true == catalogExecute(CI))
+										{
+											temp = indexExecute(CI);
+											cout << temp << endl;
+										}				
 									}
 									else
 									{
@@ -422,8 +433,11 @@ int createIndexConvert(string &sql)
 
 										if (sql[0] == ';')
 										{
-											catalogExecute(CI);
-											indexExecute(CI);
+											if (true == catalogExecute(CI))
+											{
+												temp = indexExecute(CI);
+												cout << temp << endl;
+											}
 										}
 										else
 										{
@@ -443,8 +457,12 @@ int createIndexConvert(string &sql)
 											removeSpace(sql);
 											if (sql[0] == ';')
 											{
-												catalogExecute(CI);
-												indexExecute(CI);
+												if (true == catalogExecute(CI))
+												{
+													temp = indexExecute(CI);
+													cout << temp << endl;
+												}
+												
 											}
 											else
 											{
@@ -567,7 +585,6 @@ int createTableConditionConvert(string &sql, CreateTable &CT)
 	int length;
 	int pos_space, pos_end, pos_left, pos_right;
 	string temp;
-
 
 	pos_space = sql.find(' ');
 
@@ -763,10 +780,10 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 	else
 	{
 		temp = sql.substr(0, pos_space);
-		sql.erase(0, pos_space + 1);
 		removeSpace(sql);
 		if (temp == lag_primary)
 		{
+			sql.erase(0, pos_space + 1);
 			removeSpaceAll(sql);
 			pos = sql.find('(');
 			if (pos >= 0)
@@ -789,7 +806,6 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 						{
 							CT.primary_key = temp;
 							catalogExecute(CT);
-							indexExecute(CT);
 						}
 						else
 						{
@@ -813,8 +829,20 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 		}
 		else
 		{
-			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-			return -1;
+			pos = sql.find(';');
+			while (sql[pos] != ')')
+			{
+				sql.erase(pos, 1);
+				pos--;
+			}
+			sql.erase(pos, 1);
+			sql.append(1,',');
+			opt = createTableConditionConvert(sql, CT);
+			if (opt == -1)
+			{
+				return -1;
+			}
+			catalogExecute(CT);
 		}
 	}
 
@@ -855,9 +883,9 @@ int deleteConvert(string &sql)
 				}
 				temp = sql.substr(0, pos_end);
 				D.table_name = temp;
-				catalogExecute(D);
-				recordExecute(D);
-				indexExecute(D);
+				
+				temp = recordExecute(D);
+				cout << temp << endl;
 			}
 			else
 			{
@@ -869,9 +897,9 @@ int deleteConvert(string &sql)
 				getTableInfo(D);
 				if (sql[0] == ';')
 				{
-					catalogExecute(D);
-					recordExecute(D);
-					indexExecute(D);
+					
+					temp = recordExecute(D);
+					cout << temp << endl;
 				}
 				else
 				{
@@ -893,9 +921,9 @@ int deleteConvert(string &sql)
 							{
 								return -1;
 							}
-							catalogExecute(D);
-							recordExecute(D);
-							indexExecute(D);
+							
+							temp = recordExecute(D);
+							cout << temp << endl;
 						}
 						else
 						{
@@ -1129,10 +1157,12 @@ int dropTableConvert(string &sql)
 	{
 		temp = sql.substr(0, pos_end);
 		DT.table_name = temp;
-		getTableInfo(DT);
-		catalogExecute(DT);
-		recordExecute(DT);
-		indexExecute(DT);
+		if (true == getTableInfo(DT))
+		{
+			catalogExecute(DT);
+			recordExecute(DT);
+			indexExecute(DT);
+		}	
 	}
 	else
 	{
@@ -1142,10 +1172,12 @@ int dropTableConvert(string &sql)
 		if (sql[0] == ';')
 		{
 			DT.table_name = temp;
-			getTableInfo(DT);
-			catalogExecute(DT);
-			recordExecute(DT);
-			indexExecute(DT);
+			if (true == getTableInfo(DT))
+			{
+				catalogExecute(DT);
+				recordExecute(DT);
+				indexExecute(DT);
+			}
 		}
 		else
 		{
@@ -1171,8 +1203,9 @@ int dropIndexConvert(string &sql)
 	{
 		temp = sql.substr(0, pos_end);
 		DI.index_name = temp;
-		catalogExecute(DI);
-		indexExecute(DI);
+		
+		temp = indexExecute(DI);
+		cout << temp << endl;
 	}
 	else
 	{
@@ -1187,8 +1220,8 @@ int dropIndexConvert(string &sql)
 		}
 		else
 		{
-			catalogExecute(DI);
-			indexExecute(DI);
+			temp = indexExecute(DI);
+			cout << temp << endl;
 		}
 	}
 
@@ -1253,10 +1286,12 @@ int insertConvert(string &sql)
 							}
 							else
 							{
-								getTableInfo(I);
-								indexExecute(I);
-								catalogExecute(I);
-								recordExecute(I);
+								if (true == getTableInfo(I))
+								{
+									temp = recordExecute(I);
+									cout << temp << endl;
+								}
+								
 							}
 						}
 						else
@@ -1368,9 +1403,11 @@ int selectConvert(string &sql)
 					temp = sql.substr(0, pos_end);
 					S.table_name = temp;
 
-					getTableInfo(S);
-					catalogExecute(S);
-					recordExecute(S);
+					if(true == getTableInfo(S))
+					{
+						temp = recordExecute(S);
+						cout << temp << endl;
+					}
 				}
 				else
 				{
@@ -1380,9 +1417,12 @@ int selectConvert(string &sql)
 					S.table_name = temp;
 					if (sql[0] == ';')
 					{
-						getTableInfo(S);
-						catalogExecute(S);
-						recordExecute(S);
+						if (true == getTableInfo(S))
+						{
+							temp = recordExecute(S);
+							cout << temp << endl;
+						}
+						
 					}
 					else
 					{
@@ -1405,9 +1445,11 @@ int selectConvert(string &sql)
 									return -1;
 								}
 
-								getTableInfo(S);
-								catalogExecute(S);
-								recordExecute(S);
+								if (true == getTableInfo(S))
+								{
+									temp = recordExecute(S);
+									cout << temp << endl;
+								}								
 
 							}
 							else
