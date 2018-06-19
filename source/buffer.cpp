@@ -259,6 +259,13 @@ char* Buffer::get_content(blockInfo* block_node) {
 	return block_node->cBlock;
 }
 
+void Buffer::remove_file(string file_name, bool file_type)
+{
+	fileInfo* file_node = get_file_info(file_name, file_type);
+	close_file(file_node);
+	remove((ROOT + (file_type ? "index/" : "record/") + file_name).c_str());
+}
+
 Buffer::~Buffer() {
 	//关闭文件, 清空文件头列表
 	for (fileInfo* iter = file_handle, *pre = NULL; iter;) {

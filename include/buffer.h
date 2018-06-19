@@ -189,6 +189,13 @@ public:
 		block_node: 块指针
 	*/
 	char* get_content(blockInfo *block_node);
+
+	/**
+	 * \brief 根据给定的文件名，删除文件
+	 * \param file_name 文件名
+	 * \param file_type 文件类型
+	 */
+	void remove_file(string file_name, bool file_type);
 };
 
 #endif
