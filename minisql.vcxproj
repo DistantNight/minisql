@@ -20,7 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\API.h" />
+    <ClInclude Include="include\BPTree.h" />
     <ClInclude Include="include\buffer.h" />
+    <ClInclude Include="include\catalog.h" />
+    <ClInclude Include="include\index.h" />
     <ClInclude Include="include\InputProcess.h" />
     <ClInclude Include="include\OperationInput.h" />
     <ClInclude Include="include\RecordManager.h" />
@@ -28,11 +31,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\API.cpp" />
+    <ClCompile Include="source\catalog.cpp" />
+    <ClCompile Include="source\catalogManager.cpp" />
+    <ClCompile Include="source\index.cpp" />
     <ClCompile Include="source\InputProcess.cpp" />
     <ClCompile Include="source\OperationInput.cpp" />
     <ClCompile Include="source\RecordManager.cpp" />
     <ClCompile Include="source\Serialize.cpp" />
-    <ClCompile Include="test\unit_test_buffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp" />
