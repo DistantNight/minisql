@@ -96,7 +96,7 @@ class BPTree{
 		bool 					adjustADelete(BPT node);
 		void 					findLeafWithKey(BPT node, T key, tempSearch &tS);
 		void 					getFile(std::string file_path);
-		int 					getBlockNum(std::string file_path);	
+		int 					getBlockNum(std::string file_name);	
 };		
 
 
@@ -842,14 +842,14 @@ void BPTree<T>::getFile(std::string file_path)
 }
 
 template <class T>
-int BPTree<T>::getBlockNum(std::string file_path)
+int BPTree<T>::getBlockNum(std::string file_name)
 {
     blockInfo* p;
     char* ph;
     int block_num = -1;
     do
  	{
-        p = BufferManager.get_file_block(file_path, 1, block_num + 1);
+        p = BufferManager.get_file_block(file_name, 1, block_num + 1);
         block_num++;
         ph = BufferManager.get_content(p);
     } while(ph[0] != '\0');
@@ -861,14 +861,14 @@ void BPTree<T>::writeBack()
 {
 	std::string file_path = ROOT + file_name;
 	getFile(file_path);
-	int block_num = getBlockNum(file_path);
+	int block_num = getBlockNum(file_name);
 	
 	BPT temp_head;
 	int i, j;
 	
 	for(i = 0, j = 0; temp_head != NULL; i++)
 	{
-		char* ph = BufferManager.get_content(BufferManager.get_file_block(file_path, 1, i));
+		char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
 		int offset = 0;
 		memset(ph, 0, BLOCK_LEN);
 		for(j = 0; j < temp_head -> num_of_key; j++)
@@ -881,16 +881,16 @@ void BPTree<T>::writeBack()
 			ph[offset++] = ' ';
 		}
 		ph[offset] = '\0';
-		BufferManager.set_dirty(BufferManager.get_file_block(file_path, 1, i), true);
+		BufferManager.set_dirty(BufferManager.get_file_block(file_name, 1, i), true);
 		
 		temp_head = temp_head -> next;
 	}
 	
 	while(i < block_num)
 	{
-		char* ph = BufferManager.get_content(BufferManager.get_file_block(file_path, 1, i));
+		char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
 		memset(ph, 0, BLOCK_LEN);
-		BufferManager.set_dirty(BufferManager.get_file_block(file_path, 1, i), true);
+		BufferManager.set_dirty(BufferManager.get_file_block(file_name, 1, i), true);
 		i++;
 	}
 	return;
@@ -901,12 +901,12 @@ void BPTree<T>::readAllData()
 {
     std::string file_path = ROOT + file_name;
     getFile(file_path);
-    int block_num = getBlockNum(file_path);
+    int block_num = getBlockNum(file_name);
 
 	if(block_num <= 0) block_num = 1;
 	for(int i = 0; i < block_num; i++) 
 	{
-        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_path, 1, i));
+        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
 		readFromDisk(ph, ph + BLOCK_LEN);
     }
 }
