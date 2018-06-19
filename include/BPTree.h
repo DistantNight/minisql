@@ -365,7 +365,6 @@ bool BPT_Node<T>::findInRange(unsigned int index, std:: vector<int>& vals)
 }
 
 template <class T>
-//BPTree<T>::BPTree(std::string name, int key_size, int degree):
 BPTree<T>::BPTree(std::string name, int degree):
 	file_name(name),
 	key_amount(0),
@@ -373,11 +372,10 @@ BPTree<T>::BPTree(std::string name, int degree):
 	node_amount(0),
 	root(NULL),
 	leaf_head(NULL),
-	//key_size(key_size),
 	degree(degree)
 {
 	initBPT();
-	//readAllData();
+	readAllData();
 }
 
 template <class T>
