@@ -200,7 +200,7 @@ catalogManager::catalogManager() {
 					 if (strcmp((*s).nameOfIndex[i].c_str(), "*") != 0)
 					 {
 						 cout << "The index already exists" << endl;
-						 return 0;
+						 return false;
 					 }
 					 (*s).nameOfIndex[i] = nameOfIndex;
 					 break;
@@ -209,7 +209,7 @@ catalogManager::catalogManager() {
 			 if (i == (*s).nameOfKey.size())
 			 {
 				 cout << "Fail to create index" << endl;
-				 return 0;
+				 return false;
 			 }
 			 break;
 		 }
@@ -217,30 +217,29 @@ catalogManager::catalogManager() {
 	 if (s == myt.end())
 	 {
 		 cout << "Fail to create index" << endl;
-		 return 0;
+		 return false;
 	 }
-
 	 
 	 catalogManager::index myt;
-	myt.nameOfIndex = nameOfIndex;
+	 myt.nameOfIndex = nameOfIndex;
 	 myt.tableOfIndex = tableOfIndex;
-	myt.keyOfIndex = keyOfIndex;
+	 myt.keyOfIndex = keyOfIndex;
 	 myi.push_back(myt);
 	 indexNum++;
-
-	 
+     return true;	 
  }
- bool catalogManager::deleteIndex(string nameOfIndex) {
+
+ bool catalogManager::deleteIndex(const string& name_of_index) {
 	 indexNum = indexNum - 1;
 	 int flag = 0;
-	 vector<catalogManager::index>::iterator x;
-	 for (x = myi.begin(); x != myi.end(); x++) {
-		 if ((*x).nameOfIndex == nameOfIndex) {
-			 for (int i = 0; i < myt.size(); i++) {
-				 if (myt[i].nameOfTable == (*x).tableOfIndex) {
-					 for (int j = 0; j < myt[i].nameOfIndex.size(); j++) {
-						 if (myt[i].nameOfKey[j] == (*x).keyOfIndex) {
-							 myt[i].nameOfIndex[j] = "*";
+     for (auto x = myi.begin(); x != myi.end(); ++x) {
+		 if ((*x).nameOfIndex == name_of_index) {
+			 for (auto& i : myt)
+			 {
+				 if (i.nameOfTable == (*x).tableOfIndex) {
+					 for (decltype(i.nameOfIndex.size()) j = 0; j < i.nameOfIndex.size(); j++) {
+						 if (i.nameOfKey[j] == (*x).keyOfIndex) {
+						     i.nameOfIndex[j] = "*";
 								 break;
 						 }
 					 }
@@ -255,53 +254,55 @@ catalogManager::catalogManager() {
 
 }
 	 if (flag != 1) {
-		 cout << nameOfIndex << " dosent exists" << endl;
+		 cout << name_of_index << " dosent exists" << endl;
 }
-	 remove(nameOfIndex.c_str());
-	 return 1;
+	 remove(name_of_index.c_str());
+	 return true;
 
  }
- bool catalogManager::numberOfRecordAdd(string nameOfTable, int a) {
+ bool catalogManager::numberOfRecordAdd(const string& name_of_table, int a) {
 	 int flag = 0;
-	 vector<catalogManager::table>::iterator x;
-	 for (x = myt.begin(); x != myt.end(); x++) {
-		 if ((*x).nameOfTable == nameOfTable) {
+	 for (auto x = myt.begin(); x != myt.end(); ++x) {
+		 if ((*x).nameOfTable == name_of_table) {
 			 flag = 1;
 			 (*x).numberOfRecord = (*x).numberOfRecord + a;
 		 }
 	 }
 	 if (flag == 0) {
 		 cout << "insert recorf fall" << endl;
-		 return 0;
+		 return false;
 	 }
-	 return 1;
+	 return true;
  }
  
 
  bool catalogManager::updateCatalog() {
-	const char * fileName = "db.catalog";
-	ofstream file(fileName);
+	const char * file_name = "db.catalog";
+	ofstream file(file_name);
 	if (!file) {
 		cout << "cant write into db.catalog" << endl;
+        return false;
 	}
 	else {
 		file << tableNum << endl;
 		file << indexNum << endl;
 	}
-	const char * fileName2 = "index.catalog";
-	ofstream file2(fileName2);
+	const char * file_name2 = "index.catalog";
+	ofstream file2(file_name2);
 	if (!file2) {
 		cout << "cant write into index.catalog" << endl;
+        return false;
 	}
 	for (int i = 0; i < indexNum; i++) {
 		file2 << "!start" << endl;
 		file2 << myi[i].nameOfIndex << endl;
 		file2 << myi[i].tableOfIndex<<" "<<myi[i].keyOfIndex << " "<<endl;
 	}   file2 << "!end" << endl;
-	const char * fileName3 = "table.catalog";
-	ofstream file3(fileName3);
+	const char * file_name3 = "table.catalog";
+	ofstream file3(file_name3);
 	if (!file3) {
 		cout << "cant write into table.catalog" << endl;
+        return false;
 	}
 	for (int i = 0; i < tableNum; i++) {
 		file3 << "!start" << endl;
@@ -325,30 +326,28 @@ catalogManager::catalogManager() {
 		file3 << myt[i].primaryKey<< endl;
 	}
 	file3 << "!end" << endl;
-
+    return true;
 
  }
- int catalogManager::getFullLength(string nameOfTable) {
-	 int value;
-	 value = 0;
+ int catalogManager::getFullLength(const string& name_of_table) {
+     int value = 0;
 	 vector<string> a;
-	 vector<catalogManager::table>::const_iterator b;
-	 for (b = myt.begin(); b != myt.end(); b++) {
-		 if ((*b).nameOfTable == nameOfTable)
+	 for (auto b = myt.begin(); b != myt.end(); ++b) {
+		 if ((*b).nameOfTable == name_of_table)
 			 a = (*b).nameOfType;
 	 }
 	 value = getLength(a);
+
+     return value;
  }
  int catalogManager::getLength(vector<string> x) {
 	 int value = 0;
-	 vector<string>::const_iterator a;
-	 for (a = x.begin(); a != x.end(); a++) {
+	 for (auto a = x.begin(); a != x.end(); ++a) {
 		 value = value + getLength(*a);
 	 }return value;
  }
  int catalogManager::getLength(string type) {
-	 const char * str;
-	 str = type.c_str();
+     const char * str = type.c_str();
 	 int x;
 	 if (strcspn(str, "int") == 0) {
 		 x = sizeof(int);

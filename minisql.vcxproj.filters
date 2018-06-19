@@ -56,9 +56,6 @@
     <ClCompile Include="source\OperationInput.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="source\API.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="source\InputProcess.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -69,6 +66,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="source\index.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="test\Interface.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

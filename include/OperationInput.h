@@ -1,5 +1,6 @@
 #ifndef _OPERATIONINPUT_H_
 #define _OPERATIONINPUT_H_
+#include <vector>
 
 using std::string;
 using std::vector;
@@ -50,26 +51,16 @@ class CreateTable :public Table
 {
 public:
 	string primary_key;
-public:
-	CreateTable()
-	{
 
-	}
-	//~CreateTable();
 };
 
 /*
 * name : DropTable
 * @para :
 */
-class DropTable: public Table
+class DropTable
 {
-public:
-	DropTable()
-	{
 
-	}
-	//~DropTable();
 };
 
 /*
@@ -84,11 +75,6 @@ public:
 	string index_name;
 	string index_column_name;
 public:
-	CreateIndex()
-	{
-
-	}
-	//~CreateIndex();
 
 };
 
@@ -101,12 +87,6 @@ class DropIndex :public Table
 {
 public:
 	string index_name;
-public:
-	DropIndex()
-	{
-
-	}
-	//~DropIndex();
 
 };
 
