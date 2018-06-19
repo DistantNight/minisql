@@ -60,9 +60,11 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 			iter->first_block = NULL;
 
 			//¸üÐÂLRU_file_list
-			temp->next = LRU_cur;
-			LRU_pre = LRU_cur->next;
-			LRU_cur->next = NULL;
+			if (temp != LRU_cur) {
+				temp->next = LRU_cur;
+				LRU_pre->next = LRU_cur->next;
+				LRU_cur->next = NULL;
+			}
 		}
 	}
 	else {
