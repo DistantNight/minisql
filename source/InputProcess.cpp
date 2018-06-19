@@ -272,7 +272,7 @@ int createIndexConvert(string &sql)
 								{
 									temp = indexExecute(CI);
 									cout << temp << endl;
-								}			
+								}
 							}
 							else
 							{
@@ -414,7 +414,7 @@ int createIndexConvert(string &sql)
 										{
 											temp = indexExecute(CI);
 											cout << temp << endl;
-										}				
+										}
 									}
 									else
 									{
@@ -462,7 +462,7 @@ int createIndexConvert(string &sql)
 													temp = indexExecute(CI);
 													cout << temp << endl;
 												}
-												
+
 											}
 											else
 											{
@@ -836,7 +836,7 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 				pos--;
 			}
 			sql.erase(pos, 1);
-			sql.append(1,',');
+			sql.append(1, ',');
 			opt = createTableConditionConvert(sql, CT);
 			if (opt == -1)
 			{
@@ -883,7 +883,7 @@ int deleteConvert(string &sql)
 				}
 				temp = sql.substr(0, pos_end);
 				D.table_name = temp;
-				
+
 				temp = recordExecute(D);
 				cout << temp << endl;
 			}
@@ -897,7 +897,7 @@ int deleteConvert(string &sql)
 				getTableInfo(D);
 				if (sql[0] == ';')
 				{
-					
+
 					temp = recordExecute(D);
 					cout << temp << endl;
 				}
@@ -921,7 +921,7 @@ int deleteConvert(string &sql)
 							{
 								return -1;
 							}
-							
+
 							temp = recordExecute(D);
 							cout << temp << endl;
 						}
@@ -1147,12 +1147,12 @@ int dropConvert(string &sql)
 int dropTableConvert(string &sql)
 {
 	int opt = 2;
-	int pos;
+	int pos_space, pos_end, pos;
 	string temp;
 	DropTable DT;
 
-	auto pos_space = sql.find(' ');
-	auto pos_end = sql.find(';');
+	pos_space = sql.find(' ');
+	pos_end = sql.find(';');
 	if (pos_space < 0)
 	{
 		temp = sql.substr(0, pos_end);
@@ -1162,7 +1162,7 @@ int dropTableConvert(string &sql)
 			catalogExecute(DT);
 			recordExecute(DT);
 			indexExecute(DT);
-		}	
+		}
 	}
 	else
 	{
@@ -1203,7 +1203,7 @@ int dropIndexConvert(string &sql)
 	{
 		temp = sql.substr(0, pos_end);
 		DI.index_name = temp;
-		
+
 		temp = indexExecute(DI);
 		cout << temp << endl;
 	}
@@ -1291,7 +1291,7 @@ int insertConvert(string &sql)
 									temp = recordExecute(I);
 									cout << temp << endl;
 								}
-								
+
 							}
 						}
 						else
@@ -1403,7 +1403,7 @@ int selectConvert(string &sql)
 					temp = sql.substr(0, pos_end);
 					S.table_name = temp;
 
-					if(true == getTableInfo(S))
+					if (true == getTableInfo(S))
 					{
 						temp = recordExecute(S);
 						cout << temp << endl;
@@ -1422,7 +1422,7 @@ int selectConvert(string &sql)
 							temp = recordExecute(S);
 							cout << temp << endl;
 						}
-						
+
 					}
 					else
 					{
@@ -1449,7 +1449,7 @@ int selectConvert(string &sql)
 								{
 									temp = recordExecute(S);
 									cout << temp << endl;
-								}								
+								}
 
 							}
 							else
