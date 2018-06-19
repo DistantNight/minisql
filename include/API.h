@@ -1,7 +1,7 @@
 #ifndef _API_H_
 #define _API_H_
 
-#include "OperationInput.h"
+using std::string;
 
 // 从catalog management中获取表的所有信息，table name已实现储存在输入中
 bool getTableInfo(Table &);

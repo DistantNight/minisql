@@ -1,10 +1,9 @@
 #ifndef _OPERATIONINPUT_H_
 #define _OPERATIONINPUT_H_
 
-#include <iostream>
-#include <string>
-#include <vector>
-using namespace std; // TODO: Do NOT using namespace in head file
+using std::string;
+using std::vector;
+
 #define COLUMNMAXSIZE 32 
 
 typedef enum COLUMNTYPE
@@ -35,7 +34,10 @@ public:
 	int exist_index_num;
 	vector<string> exist_index_name;
 public:
-	//Table();
+	Table()
+	{
+
+	}
 	//~Table();
 };
 
@@ -49,8 +51,11 @@ class CreateTable :public Table
 public:
 	string primary_key;
 public:
-	CreateTable();
-	~CreateTable();
+	CreateTable()
+	{
+
+	}
+	//~CreateTable();
 };
 
 /*
@@ -60,8 +65,11 @@ public:
 class DropTable
 {
 public:
-	DropTable();
-	~DropTable();
+	DropTable()
+	{
+
+	}
+	//~DropTable();
 };
 
 /*
@@ -76,8 +84,11 @@ public:
 	string index_name;
 	string index_column_name;
 public:
-	CreateIndex();
-	~CreateIndex();
+	CreateIndex()
+	{
+
+	}
+	//~CreateIndex();
 
 };
 
@@ -91,8 +102,11 @@ class DropIndex :public Table
 public:
 	string index_name;
 public:
-	DropIndex();
-	~DropIndex();
+	DropIndex()
+	{
+
+	}
+	//~DropIndex();
 
 };
 
@@ -108,7 +122,10 @@ public:
 	string row_value[COLUMNMAXSIZE];
 	int value_num;
 public:
-	//Insert();
+	Insert()
+	{
+
+	}
 	//~Insert();
 };
 
@@ -128,7 +145,10 @@ public:
 	vector<string> condition_op;
 	vector<string> condition_value;
 public:
-	//Delete();
+	Delete()
+	{
+
+	}
 	//~Delete();
 
 };
@@ -149,7 +169,10 @@ public:
 	vector<string> condition_op;
 	vector<string> condition_value;
 public:
-	//Select();
+	Select()
+	{
+
+	}
 	//~Select();
 };
 
