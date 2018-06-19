@@ -60,9 +60,11 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 			iter->first_block = NULL;
 
 			//¸üÐÂLRU_file_list
-			temp->next = LRU_cur;
-			LRU_pre = LRU_cur->next;
-			LRU_cur->next = NULL;
+			if (temp != LRU_cur) {
+				temp->next = LRU_cur;
+				LRU_pre->next = LRU_cur->next;
+				LRU_cur->next = NULL;
+			}
 		}
 	}
 	else {
@@ -257,6 +259,13 @@ void Buffer::set_lock(fileInfo* file_node, bool lock) {
 
 char* Buffer::get_content(blockInfo* block_node) {
 	return block_node->cBlock;
+}
+
+void Buffer::remove_file(string file_name, bool file_type)
+{
+	fileInfo* file_node = get_file_info(file_name, file_type);
+	close_file(file_node);
+	remove((ROOT + (file_type ? "index/" : "record/") + file_name).c_str());
 }
 
 Buffer::~Buffer() {
