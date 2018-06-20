@@ -12,9 +12,9 @@
 #include "buffer.h"
 
 
-#define  SMALL_AMOUNT  			30                                  //ÉÙÓÚÕâ¸öÊıÁ¿£¬Ö±½Ó±éÀú 
+#define  SMALL_AMOUNT  			30                                  //å°‘äºè¿™ä¸ªæ•°é‡ï¼Œç›´æ¥éå† 
 
-const string ROOT = "./data/";										//Õâ¸öÄ¿Â¼Ö®ºóÍ³Ò»Ò»ÏÂ,·ÅË÷ÒıÎÄ¼şµÄ 
+const string ROOT = "./data/";										//è¿™ä¸ªç›®å½•ä¹‹åç»Ÿä¸€ä¸€ä¸‹,æ”¾ç´¢å¼•æ–‡ä»¶çš„ 
 extern Buffer* database;
 
 template <typename T>
@@ -26,7 +26,7 @@ void copyStr(char* p , int& offset , T data)
     for(int i = 0; i < s.length(); i++, offset++) p[offset] = s[i];
 }
 
-//B+Ê÷½ÚµãÀà¶¨Òå 
+//B+æ ‘èŠ‚ç‚¹ç±»å®šä¹‰ 
 
 template <typename T>
 class BPT_Node{
@@ -39,7 +39,7 @@ class BPT_Node{
 		BPT_Node*				next;			 
 
 		std::vector<T> 			keys;			 
-		std::vector<int>		values;    		//ÆäÖĞvalueÊÇÖ¸¸ÃkeyµÄÊı¾İËù´æ·ÅÔÚµÄBlock_num 
+		std::vector<int>		values;    		//å…¶ä¸­valueæ˜¯æŒ‡è¯¥keyçš„æ•°æ®æ‰€å­˜æ”¾åœ¨çš„Block_num 
 		std::vector<BPT_Node*> 	childs;			 
 
 	public:
@@ -807,7 +807,7 @@ void BPTree<T>::printTree()
 	BPT p = leaf_head;
 	while(p != NULL)
 	{
-		if(flag) std::cout << "¡ı" << std::endl;
+		if(flag) std::cout << "â†“" << std::endl;
 		flag = 1;
 		p -> printNode();
 		p = p -> nextLeafNode();
@@ -865,7 +865,7 @@ void BPTree<T>::writeBack()
 	getFile(file_path);
 	int block_num = getBlockNum(file_name);
 	
-	BPT temp_head;
+	BPT temp_head = leaf_head;
     int i;
     unsigned j;
 	
