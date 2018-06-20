@@ -14,7 +14,7 @@
 #include "buffer.h"
 #include "index.h"
 
-#define USE_INDEX
+//#define USE_INDEX
 
 extern Buffer* database;
 using namespace std;

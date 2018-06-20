@@ -807,7 +807,7 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 						if (sql[0] == ')' && sql[1] == ';')
 						{
 							CT.primary_key = temp;
-							catalogExecute(CT);
+							cout << catalogExecute(CT) << endl;
 						}
 						else
 						{
@@ -844,7 +844,7 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 			{
 				return -1;
 			}
-			catalogExecute(CT);
+			cout << catalogExecute(CT) << endl;
 		}
 	}
 
@@ -1293,7 +1293,6 @@ int insertConvert(string &sql)
 									temp = recordExecute(I);
 									cout << temp << endl;
 								}
-
 							}
 						}
 						else

@@ -13,7 +13,7 @@ int main()
 {
     Buffer d;
     database = &d;
-	logInterface();
+	// logInterface();
 	execInterface();
 	
     x.updateCatalog();

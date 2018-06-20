@@ -235,7 +235,7 @@ int catalogManager::createIndex(const string& nameOfIndex, const string& tableOf
             }
             if (i == (*s).nameOfKey.size())
             {
-                cout << "Fail to create index" << endl;
+                cout << "Catalog Manager: Fail to create index" << endl;
                 return 0;
             }
             break;
@@ -243,7 +243,7 @@ int catalogManager::createIndex(const string& nameOfIndex, const string& tableOf
     }
     if (s == myt.end())
     {
-        cout << "Fail to create index" << endl;
+        cout << "Catalog Manager: Fail to create index" << endl;
         return 0;
     }
 
@@ -255,8 +255,8 @@ int catalogManager::createIndex(const string& nameOfIndex, const string& tableOf
     myi.push_back(myt);
     indexNum++;
     return 1;
-
 }
+
 int catalogManager::deleteIndex(const string& nameOfIndex)
 {
     indexNum = indexNum - 1;
