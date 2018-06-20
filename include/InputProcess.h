@@ -43,6 +43,9 @@ int insertConditionConvert(string &, Insert &);
 int selectConvert(string &);
 int selectConditionConvert(string &, Select &);
 
+int execfileConvert(string &);
+void getFileConvert(string &);
+
 bool isSqlEnd(string &);
 
 void removeSpace(string &);

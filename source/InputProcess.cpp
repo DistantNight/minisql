@@ -1,6 +1,8 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
+#include <ostream>
 #include "../include/OperationInput.h"
 #include "../include/API.h"
 #include "../include/InputProcess.h"
@@ -140,7 +142,7 @@ int sqlConvert(string &sql)
 		}
 		else if (temp == lag_execfile)
 		{
-
+			opt = execfileConvert(sql);
 		}
 		else if (temp == lag_quit)
 		{
@@ -1636,6 +1638,73 @@ int selectConditionConvert(string &sql, Select &S)
 	}
 
 	return opt;
+}
+
+int execfileConvert(string &sql)
+{
+	int opt = 50;
+	int pos_space, pos_end;
+	string temp;
+	string file_pos("../test_file/");
+
+	pos_space = sql.find(' ');
+	pos_end = sql.find(';');
+	if (pos_space >= 0)
+	{
+		temp = sql.substr(0, pos_space);
+		sql.erase(0, pos_space + 1);
+		removeSpace(sql);
+		if (sql[0] == ';')
+		{
+			file_pos += temp;
+			getFileConvert(file_pos);
+		}
+		else
+		{
+			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+			return -1;
+		}
+	}
+	else
+	{
+		temp = sql.substr(0, pos_end);
+		sql.erase(0, pos_end + 1);
+		file_pos += temp;
+		getFileConvert(file_pos);
+	}
+
+	return opt;
+}
+
+void getFileConvert(string &file_pos)
+{
+	ifstream file(file_pos, ios::_Nocreate);
+	string temp;
+	char c;
+
+	if (!file)
+	{
+		cout << "ERROR 00002: File open error." << endl;
+		return;
+	}
+	else
+	{
+		temp.assign("");
+		while ((c = file.get()) != EOF)
+		{
+			if (c == '\n')
+			{
+				c = ' ';
+			}
+			temp.append(1, c);
+			if (c == ';')
+			{
+				sqlConvert(temp);
+				temp.assign("");
+			}
+		}
+	}
+
 }
 
 //判断执行界面一条sql语句是否输入结束
