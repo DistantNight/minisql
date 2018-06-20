@@ -9,10 +9,81 @@ using namespace std;
 class catalogManager;
 extern catalogManager x;
 
-bool getTableInfo(Table & a)
+bool getTableInfo(Table & d)
 {
+    const int a = x.isTableExist(d.table_name);
+    if (a == 0)
+    {
+        cout << "ERROR 0001: no table named " << d.table_name << endl;
+        return false;
+    }
+    int flag = 0;
+    for (auto& s : x.myt)
+    {
+        if (s.nameOfTable == d.table_name)
+        {
+            d.column_num = s.numberOfKey;
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+                d.column_name[i] = s.nameOfKey[i];
+            }
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+                string str = s.nameOfType[i];
+                const char * ee = str.c_str();
+                if (s.nameOfType[i] == "int")
+                {
+                    d.column_type[i] = INT;
+                }
+                else if (strcspn(ee, "char") == 0)
+                {
+                    d.column_type[i] = CHAR;
+                }
+                else if (s.nameOfType[i] == "float")
+                {
+                    d.column_type[i] = FLOAT;
+                }
+            }
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
+                {
+                    d.string_length[i] = 0;
+                }
+                else
+                {
+                    const int f = s.nameOfType[i].find_first_of("(");
+                    const int e = s.nameOfType[i].find_first_of(")");
+                    string fen = s.nameOfType[i].substr(f + 1, e - 1);
 
-    x.myprint(a.table_name);
+                    d.string_length[i] = atoi(fen.c_str());
+                }
+            }
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+                d.is_unique[i] = static_cast<bool>(s.isUnique[i]);
+            }
+            d.primary_key = s.primaryKey;
+            int numc = 0;
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+
+                if (s.nameOfIndex[i] != "*") numc++;
+            }
+            d.exist_index_num = numc;
+            for (int i = 0; i < s.numberOfKey; i++)
+            {
+                if (s.nameOfIndex[i] == "*")
+                {
+                    d.all_index_name[i] = ("");
+                }
+                else
+                {
+                    d.all_index_name[i] = (s.nameOfIndex[i]);//* -> not exist
+                }
+            }
+        }
+    }
     return true;
 }
 
@@ -58,13 +129,15 @@ string catalogExecute(CreateTable & b)
     bool j = x.createTable(b.table_name, colname, coltype, isU, b.primary_key);
     if (j == 0)
     {
-
-        return "create fail";
+        return "CatalogManager: create table fail";
     }
-    const string c = b.table_name + "_idx";
-    x.createIndex(c, b.table_name, b.primary_key);
+    if (!b.primary_key.empty())
+    {
+        const string c = b.table_name + "_idx";
+        x.createIndex(c, b.table_name, b.primary_key);
+    }
 
-    return "creatr success";
+    return "Create table " + b.table_name + " successfully";
 }
 
 string catalogExecute(DropTable & c)
