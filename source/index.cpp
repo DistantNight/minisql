@@ -15,12 +15,12 @@ IndexManager<T>::IndexManager(const Table& table)
 	//{
 	//vector<std::string> indexs = catalog.nameOfIndex(table_name);
 	//vector<std::string> types = catalog.nameOfType(table_name);
-	string* indexs = table.index_name;
-	ColumnType* types = table.column_type;
-	int* sizes = table.string_length;
+	const string* indexs = table.all_index_name;
+	const ColumnType* types = table.column_type;
+	const int* sizes = table.string_length;
 	for(unsigned int i = 0; i < COLUMNMAXSIZE; i++)
 	{
-		if(indexs[i]) createIndex(indexs[i], types[i], sizes[i]));			
+		if(indexs[i] != "") createIndex(indexs[i], types[i], sizes[i]);			
 	}
 	//}	
 } 
@@ -28,7 +28,7 @@ IndexManager<T>::IndexManager(const Table& table)
 template <typename T> 
 IndexManager<T>::~IndexManager()
 {
-	for(intMap::iterator i_Int = indexIntMap.begin(); i_Int != indexIntMap.end(); i_Int++)
+	for(intMap::iterator i_Int = indexIntMap.begin(); i_Int != indexIntMap.end(); ++i_Int)
 	{
 		if(i_Int -> second)
 		{
@@ -36,7 +36,7 @@ IndexManager<T>::~IndexManager()
 			delete i_Int -> second;
 		}
 	}
-	for(floatMap::iterator i_Float = indexFloatMap.begin(); i_Float != indexFloatMap.end(); i_Float++)
+	for(floatMap::iterator i_Float = indexFloatMap.begin(); i_Float != indexFloatMap.end(); ++i_Float)
 	{
 		if(i_Float -> second)
 		{
@@ -44,7 +44,7 @@ IndexManager<T>::~IndexManager()
 			delete i_Float -> second;
 		}
 	}
-	for(stringMap::iterator i_String = indexStringMap.begin(); i_String != indexStringMap.end(); i_String++)
+	for(stringMap::iterator i_String = indexStringMap.begin(); i_String != indexStringMap.end(); ++i_String)
 	{
 		if(i_String -> second)
 		{
