@@ -102,7 +102,7 @@ string catalogExecute(DropTable & c)
             }
             for (int i = 0; i < (*s).numberOfKey; i++)
             {
-                if (((*s).nameOfType[i] == "int") || ((*s).nameOfType[i] == "float"))
+                if ((*s).nameOfType[i] == "int" || (*s).nameOfType[i] == "float")
                 {
                     c.string_length[i] = 0;
                 }
@@ -131,11 +131,11 @@ string catalogExecute(DropTable & c)
             {
                 if ((*s).nameOfIndex[i] == "*")
                 {
-                    c.exist_index_name.emplace_back("");
+                    c.all_index_name[i] = "";
                 }
                 else
                 {
-                    c.exist_index_name.push_back((*s).nameOfIndex[i]);//* -> not exist
+                    c.all_index_name[i] = (*s).nameOfIndex[i];//* -> not exist
                 }
 
             }
@@ -188,7 +188,7 @@ bool catalogExecute(CreateIndex &d)
             }
             for (int i = 0; i < s.numberOfKey; i++)
             {
-                if ((s.nameOfType[i] == "int") || (s.nameOfType[i] == "float"))
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
                 {
                     d.string_length[i] = 0;
                 }
@@ -217,11 +217,11 @@ bool catalogExecute(CreateIndex &d)
             {
                 if (s.nameOfIndex[i] == "*")
                 {
-                    d.exist_index_name.emplace_back("");
+                    d.all_index_name[i] = "";
                 }
                 else
                 {
-                    d.exist_index_name.push_back(s.nameOfIndex[i]);//* -> not exist
+                    d.all_index_name[i] = s.nameOfIndex[i];//* -> not exist
                 }
             }
 
@@ -273,7 +273,7 @@ bool catalogExecute(DropIndex &d)
             }
             for (int i = 0; i < s.numberOfKey; i++)
             {
-                if ((s.nameOfType[i] == "int") || (s.nameOfType[i] == "float"))
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
                 {
                     d.string_length[i] = 0;
                 }
@@ -302,11 +302,11 @@ bool catalogExecute(DropIndex &d)
             {
                 if (s.nameOfIndex[i] == "*")
                 {
-                    d.exist_index_name.emplace_back("");
+                    d.all_index_name[i] = "";
                 }
                 else
                 {
-                    d.exist_index_name.push_back(s.nameOfIndex[i]);//* -> not exist
+                    d.all_index_name[i] = s.nameOfIndex[i];//* -> not exist
                 }
             }
 
@@ -365,7 +365,7 @@ bool catalogExecute(Insert &d)
             }
             for (int i = 0; i < s.numberOfKey; i++)
             {
-                if ((s.nameOfType[i] == "int") || (s.nameOfType[i] == "float"))
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
                 {
                     d.string_length[i] = 0;
                 }
@@ -393,11 +393,11 @@ bool catalogExecute(Insert &d)
             {
                 if (s.nameOfIndex[i] == "*")
                 {
-                    d.exist_index_name.emplace_back("");
+                    d.all_index_name[i] = ("");
                 }
                 else
                 {
-                    d.exist_index_name.push_back(s.nameOfIndex[i]);//* -> not exist
+                    d.all_index_name[i] = (s.nameOfIndex[i]);//* -> not exist
                 }
             }
 
@@ -444,7 +444,7 @@ bool catalogExecute(Delete &d)
             }
             for (int i = 0; i < s.numberOfKey; i++)
             {
-                if ((s.nameOfType[i] == "int") || (s.nameOfType[i] == "float"))
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
                 {
                     d.string_length[i] = 0;
                 }
@@ -472,11 +472,11 @@ bool catalogExecute(Delete &d)
             {
                 if (s.nameOfIndex[i] == "*")
                 {
-                    d.exist_index_name.emplace_back("");
+                    d.all_index_name[i] = ("");
                 }
                 else
                 {
-                    d.exist_index_name.push_back(s.nameOfIndex[i]);//* -> not exist
+                    d.all_index_name[i] = (s.nameOfIndex[i]);//* -> not exist
                 }
             }
 
@@ -533,7 +533,7 @@ bool catalogExecute(Select &d)
             }
             for (int i = 0; i < s.numberOfKey; i++)
             {
-                if ((s.nameOfType[i] == "int") || (s.nameOfType[i] == "float"))
+                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
                 {
                     d.string_length[i] = 0;
                 }
@@ -562,11 +562,11 @@ bool catalogExecute(Select &d)
             {
                 if (s.nameOfIndex[i] == "*")
                 {
-                    d.exist_index_name.emplace_back("");
+                    d.all_index_name[i] = ("");
                 }
                 else
                 {
-                    d.exist_index_name.push_back(s.nameOfIndex[i]);//* -> not exist
+                    d.all_index_name[i] = (s.nameOfIndex[i]);//* -> not exist
                 }
             }
 

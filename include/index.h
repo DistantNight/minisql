@@ -116,7 +116,7 @@ void IndexManager::deleteIndexByKey(const std::string& file_path, T data, COLUMN
 		{
 			return;
 		}
-		else i_Int -> second -> deleteKey(data);
+		else i_Int -> second -> deleteKey(reinterpret_cast<int&>(data));
 	}
 	else if(type == FLOAT)
 	{
@@ -125,7 +125,7 @@ void IndexManager::deleteIndexByKey(const std::string& file_path, T data, COLUMN
 		{
 			return;
 		}
-		else i_Float -> second -> deleteKey(data);
+		else i_Float -> second -> deleteKey(reinterpret_cast<float&>(data));
 	}
 	else
 	{
@@ -134,7 +134,7 @@ void IndexManager::deleteIndexByKey(const std::string& file_path, T data, COLUMN
 		{
 			return;
 		}
-		else i_String -> second -> deleteKey(data);
+		else i_String -> second -> deleteKey(reinterpret_cast<string&>(data));
 	}
 	return;
 }

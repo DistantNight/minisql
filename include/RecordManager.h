@@ -44,6 +44,7 @@ public:
     void tellBufferPageHasChanged() const;
 
     static bool passUniqueConstraintTest(const Insert& table, const RecordManager& r);
+
 };
 
 

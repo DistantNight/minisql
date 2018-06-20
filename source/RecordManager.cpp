@@ -217,7 +217,7 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         return std::vector<std::string>();
     }
     std::vector<std::string> result(table_.column_num);
-    const auto begin_position = begin() + tuple_i * tuple_size;
+    auto reading_position = begin() + tuple_i * tuple_size;
 
     for (int i = 0; i < table_.column_num; ++i) // put values in to the table
     {
@@ -236,15 +236,15 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         switch (table_.column_type[i])
         {
         case INT:
-            value_int = unpackInt(&begin_position[offset]);
+            value_int = unpackInt(&reading_position[offset]);
             result.at(i) = std::to_string(value_int);
             break;
         case FLOAT:
-            value_float = unpackFloat(&begin_position[offset]);
+            value_float = unpackFloat(&reading_position[offset]);
             result.at(i) = std::to_string(value_float);
             break;
         case CHAR:
-            str = unpackString(&begin_position[offset], table_.string_length[i]);
+            str = unpackString(&reading_position[offset], table_.string_length[i]);
             result.at(i) = str;
             break;
         }
@@ -429,7 +429,7 @@ string recordExecute(Insert &table)
 string recordExecute(Select &table)
 {
     ostringstream query_result;
-    
+
     vector<vector<string>> columns(table.column_num); // search result will store here for printing
     vector<size_t> columns_print_width(table.column_num, 0);
     for (int i = 0; i < table.column_num; ++i)
@@ -439,7 +439,13 @@ string recordExecute(Select &table)
     }
 
     RecordManager r(table);
-    
+
+    /*map<string, int> column_name_to_index;
+    for (int i = 0; i < table.column_num; ++i)
+    {
+        column_name_to_index.insert(make_pair(table.column_name[i], i));
+    }*/
+
     r.toNextPage();
     if (r.isEmptyPage()) // new page, empty record
     {
@@ -463,12 +469,68 @@ string recordExecute(Select &table)
         query_result << table_border.str() << "\n0 row in set";
         return query_result.str();
     }
+    bool select_finish = false;
+#ifdef USE_INDEX
+    // Use index only when:
+    // (1) there is only one condition,
+    // (2) and it is an equality querying
+    // (3) on the column that has an index    
+    if (table.condition_num == 1 && table.condition_op.at(0) == "=")
+    {
+        const auto i = r.column_name_to_index[table.condition_name.at(0)];
+        const auto index_name = table.all_index_name[i];
+        if (!index_name.empty()) // the column that has an index 
+        {
+            IndexManager index_manager(table);
+            std::istringstream record(table.condition_value[0]);
+            int page_num = 0;
+            switch (table.column_type[i])
+            {
+            case INT:
+                int int_value;
+                record >> int_value;
+                page_num = index_manager.findIndex(index_name, int_value, INT);
+                break;
+            case FLOAT:
+                float float_value;
+                record >> float_value;
+                page_num = index_manager.findIndex(index_name, float_value, FLOAT);
+                break;
+            case CHAR:
+                page_num = index_manager.findIndex(index_name, table.condition_value[0], CHAR);
+                break;
+            }
+            if (page_num == -1) // draw empty table
+            {
+                ostringstream table_border;
+                table_border << '+';
+                for (int j = 0; j < table.column_num; ++j)
+                {
+                    const string border(columns_print_width[j] + 2, '-');
+                    table_border << border;
+                    table_border << '+';
+                }
+                query_result << table_border.str() << "\n|"; // e.g. +-----------+------+------------+-----------------+
+                for (int j = 0; j < table.column_num; ++j)   // e.g. | City name | Area | Population | Annual Rainfall |
+                {
+                    query_result << ' ';
+                    query_result << setw(columns_print_width[j]) << columns.at(j)[0]; // header
+                    query_result << " |";
+                }
+                query_result << '\n' << table_border.str() << '\n';
+                query_result << table_border.str() << "\n0 row in set";
+                return query_result.str();
+            }
+            r.setCurrentPageIndex(page_num);
+            select_finish = true;
+        }
 
-    // TODO: other quering
-
+    }
+#endif
 
     // begin sequential quering
     int result_tuple_num = 1; // 1 for the title
+
     do
     {
         const bool last_page = r.haveSpaceToInsert(); // if it has space to insert, then it must be the last page
@@ -481,7 +543,6 @@ string recordExecute(Select &table)
         while (reading_positon < r.end()) // !eof
         {
             bool meet_conditions = true;
-            // auto read_here = reading_positon;
             if (r.tupleDeleted(tuple_i)) // deleted
             {
                 reading_positon += r.tuple_size;
@@ -543,6 +604,10 @@ string recordExecute(Select &table)
         {
             break;
         }
+        if (select_finish)
+        {
+            break;
+        }
         r.toNextPage();
     } while (true);
     
@@ -592,6 +657,61 @@ string recordExecute(Delete &table) // delete
         return string("Query OK, 0 row affected.");
     }
 
+#ifdef USE_INDEX
+    // Use index only when:
+    // (1) there is only one condition,
+    // (2) and it is an equality querying
+    // (3) on the column that has an index    
+    if (table.condition_num == 1 && table.condition_op.at(0) == "=")
+    {
+        const auto i = r.column_name_to_index[table.condition_name.at(0)];
+        const auto index_name = table.all_index_name[i];
+        if (!index_name.empty()) // the column that has an index 
+        {
+            IndexManager index_manager(table);
+            std::istringstream record(table.condition_value[0]);
+            int page_num = 0;
+            switch (table.column_type[i])
+            {
+            case INT:
+                int int_value;
+                record >> int_value;
+                page_num = index_manager.findIndex(index_name, int_value, INT);
+                index_manager.deleteIndexByKey(index_name, int_value, INT);
+                break;
+            case FLOAT:
+                float float_value;
+                record >> float_value;
+                page_num = index_manager.findIndex(index_name, float_value, FLOAT);
+                index_manager.deleteIndexByKey(index_name, float_value, FLOAT);
+                break;
+            case CHAR:
+                page_num = index_manager.findIndex(index_name, table.condition_value[0], CHAR);
+                index_manager.deleteIndexByKey(index_name, table.condition_value[0], CHAR);
+                break;
+            }
+            if (page_num == -1)
+            {
+                return "Query OK, 0 row affected";
+            }
+            r.setCurrentPageIndex(page_num);
+            
+            for (int j = 0; j < r.getEndofTupleOffset() / r.tuple_size; ++j)
+            {
+                if (r.tupleDeleted(i))
+                {
+                    continue;
+                }
+                auto t = r.getTuple(i);
+                if (t.at(i) == table.condition_value[0])
+                {
+                    r.lazyDeleteTuple(i);
+                    return "Query OK, 1 row affected";
+                }
+            }
+        }
+    }
+#endif
     // begin sequential quering
     do
     {
@@ -715,14 +835,4 @@ string indexExecute(CreateIndex& table)
 string indexExecute(DropIndex& table)
 {
     return "Drop index successfully";
-}
-
-bool indexExecute(Insert& table)
-{
-    return true;
-}
-
-bool indexExecute(Delete& table)
-{
-    return true;
 }

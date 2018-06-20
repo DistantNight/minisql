@@ -16,9 +16,17 @@ IndexManager::IndexManager(const Table& table)
 	const string* indexs = table.all_index_name;
 	const ColumnType* types = table.column_type;
 	const int* sizes = table.string_length;
-	for(unsigned int i = 0; i < COLUMNMAXSIZE; i++)
+    for (int i = 0; i < table.column_num; i++)
 	{
-		if(!indexs[i].empty()) createIndex(indexs[i], types[i], sizes[i]);			
+        if (!indexs[i].empty())
+        {
+            int size = sizes[i];
+            if (size == 0)
+            {
+                size = 4;
+            }
+            createIndex(indexs[i], types[i], size);
+        }
 	}
 	//}	
 } 
