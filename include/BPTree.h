@@ -12,9 +12,8 @@
 #include "buffer.h"
 
 
-#define  SMALL_AMOUNT  			30                                  //ÉÙÓÚÕâ¸öÊıÁ¿£¬Ö±½Ó±éÀú 
+#define  SMALL_AMOUNT  			30                                  //å°‘äºè¿™ä¸ªæ•°é‡ï¼Œç›´æ¥éå† 
 
-const string ROOT = "./data/";										//Õâ¸öÄ¿Â¼Ö®ºóÍ³Ò»Ò»ÏÂ,·ÅË÷ÒıÎÄ¼şµÄ 
 extern Buffer* database;
 
 template <typename T>
@@ -26,7 +25,7 @@ void copyStr(char* p , int& offset , T data)
     for(decltype(s.length()) i = 0; i < s.length(); i++, offset++) p[offset] = s[i];
 }
 
-//B+Ê÷½ÚµãÀà¶¨Òå 
+//B+æ ‘èŠ‚ç‚¹ç±»å®šä¹‰ 
 
 template <typename T>
 class BPT_Node{
@@ -39,7 +38,7 @@ class BPT_Node{
 		BPT_Node*				next;			 
 
 		std::vector<T> 			keys;			 
-		std::vector<int>		values;    		//ÆäÖĞvalueÊÇÖ¸¸ÃkeyµÄÊı¾İËù´æ·ÅÔÚµÄBlock_num 
+		std::vector<int>		values;    		//å…¶ä¸­valueæ˜¯æŒ‡è¯¥keyçš„æ•°æ®æ‰€å­˜æ”¾åœ¨çš„Block_num 
 		std::vector<BPT_Node*> 	childs;			 
 
 	public:
@@ -95,7 +94,6 @@ class BPTree{
 		bool 					adjustAInsert(BPT node);
 		bool 					adjustADelete(BPT node);
 		void 					findLeafWithKey(BPT node, T key, tempSearch &tS);
-		void 					getFile(const std::string& file_path);
 		int 					getBlockNum(const std::string& file_name);	
 };		
 
@@ -803,7 +801,7 @@ void BPTree<T>::printTree()
 	BPT p = leaf_head;
 	while(p != nullptr)
 	{
-		if(flag) std::cout << "¡ı" << std::endl;
+		if(flag) std::cout << "â†“" << std::endl;
 		flag = 1;
 		p -> printNode();
 		p = p -> nextLeafNode();
@@ -821,20 +819,6 @@ void BPT_Node<T>::printNode()
 		else std::cout << " -> " << keys[i];
 	}
 	std::cout << std::endl;
-}
-
-template <class T>
-void BPTree<T>::getFile(const std::string& file_path) 
-{
-    FILE* f = fopen(file_path.c_str() , "r");
-    if (f == NULL) 
-	{
-        f = fopen(file_path.c_str(), "w+");
-        fclose(f);
-        f = fopen(file_path.c_str() , "r");
-    }
-    fclose(f);
-    return;
 }
 
 template <class T>
@@ -857,10 +841,7 @@ template <class T>
 void BPTree<T>::writeBack()
 {
     Buffer& BufferManager = *database;
-    const std::string file_path = ROOT + file_name;
-	getFile(file_path);
     const int block_num = getBlockNum(file_name);
-	
 	BPT temp_head = leaf_head;
     int i;
     unsigned j;
@@ -899,9 +880,7 @@ template <class T>
 void BPTree<T>::readAllData()
 {
     Buffer& BufferManager = *database;
-    const std::string file_path = ROOT + file_name;
-    getFile(file_path);
-    int block_num = getBlockNum(file_name);
+    const int block_num = getBlockNum(file_name);
 
 	if(block_num <= 0) block_num = 1;
 	for(int i = 0; i < block_num; i++) 
