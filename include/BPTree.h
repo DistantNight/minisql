@@ -15,7 +15,7 @@
 #define  SMALL_AMOUNT  			30                                  //少于这个数量，直接遍历 
 
 const string ROOT = "./data/";										//这个目录之后统一一下,放索引文件的 
-extern Buffer BufferManager; 
+extern Buffer* database;
 
 template <typename T>
 void copyStr(char* p , int& offset , T data)
@@ -844,6 +844,7 @@ void BPTree<T>::getFile(std::string file_path)
 template <class T>
 int BPTree<T>::getBlockNum(std::string file_name)
 {
+    Buffer& BufferManager = *database;
     blockInfo* p;
     char* ph;
     int block_num = -1;
@@ -859,12 +860,14 @@ int BPTree<T>::getBlockNum(std::string file_name)
 template <class T>
 void BPTree<T>::writeBack()
 {
-	std::string file_path = ROOT + file_name;
+    Buffer& BufferManager = *database;
+    std::string file_path = ROOT + file_name;
 	getFile(file_path);
 	int block_num = getBlockNum(file_name);
 	
 	BPT temp_head;
-	int i, j;
+    int i;
+    unsigned j;
 	
 	for(i = 0, j = 0; temp_head != NULL; i++)
 	{
@@ -899,6 +902,7 @@ void BPTree<T>::writeBack()
 template <class T>
 void BPTree<T>::readAllData()
 {
+    Buffer& BufferManager = *database;
     std::string file_path = ROOT + file_name;
     getFile(file_path);
     int block_num = getBlockNum(file_name);

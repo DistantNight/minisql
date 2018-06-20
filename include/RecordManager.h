@@ -31,6 +31,11 @@ public:
     bool haveSpaceToInsert() const;
     void toNextPage();
     void toPreviousPage();
+    int getCurrentPageIndex() const
+    {
+        return current_page_index_;
+    }
+    void setCurrentPageIndex(int i);
 
     std::vector<std::string> getTuple(const int tuple_i) const;
     bool tupleDeleted(int tuple_i) const;

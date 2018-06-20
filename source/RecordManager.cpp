@@ -12,6 +12,9 @@
 #include <iomanip>
 #include "Serialize.h"
 #include "buffer.h"
+#include "index.h"
+
+#define USE_INDEX
 
 extern Buffer* database;
 using namespace std;
@@ -192,6 +195,17 @@ bool RecordManager::haveSpaceToInsert() const
     return end() + tuple_size < memory_page_ + page_size;
 }
 
+void RecordManager::setCurrentPageIndex(int i)
+{
+    current_page_index_ = i;
+    const auto page = database->get_file_block(table_.table_name, false, current_page_index_);
+    memory_page_ = reinterpret_cast<int8_t*> (database->get_content(page));
+    if (memory_page_ == nullptr)
+    {
+        throw runtime_error("Unable to read database file");
+    }
+}
+
 std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
 {
     if (tuple_i < 0)
@@ -283,13 +297,50 @@ string recordExecute(Insert &table)
         throw length_error("value number is not equal to column munber!");
     }
     RecordManager r(table);
-    //int8_t *memory_page = page;
+    bool still_need_check_unique_constraint = true;
 
-/*    if (memory_page == nullptr)
+#ifdef USE_INDEX
+    IndexManager index_manager(table);
+    still_need_check_unique_constraint = false;
+    for (int i = 0; i < table.value_num; ++i)
     {
-       return string("Unable to read database file");
-    }*/ 
-
+        std::istringstream record(table.row_value[i]);
+        auto index_name = table.all_index_name[i];
+        if (!index_name.empty()) // this colume has index, so must be unique
+        {
+            switch (table.column_type[i])
+            {
+            case INT:
+                int int_value;
+                record >> int_value;
+                if (index_manager.findIndex(index_name, int_value, INT) != -1)
+                {
+                    return std::string("ERROR 1551: Cannot insert a row: a unique key constraint fails");
+                }
+                break;
+            case FLOAT:
+                float float_value;
+                record >> float_value;
+                if (index_manager.findIndex(index_name, float_value, FLOAT) != -1)
+                {
+                    return std::string("ERROR 1551: Cannot insert a row: a unique key constraint fails");
+                }
+                break;
+            case CHAR:
+                if (index_manager.findIndex(index_name, table.row_value[i], CHAR) != -1)
+                {
+                    return std::string("ERROR 1551: Cannot insert a row: a unique key constraint fails");
+                }
+                break;
+            }
+        }
+        else if (table.is_unique[i])
+        {
+            still_need_check_unique_constraint = true;
+        }
+    }
+#endif
+   
     while (true)
     {
         r.toNextPage();
@@ -297,7 +348,7 @@ string recordExecute(Insert &table)
         {
             r.addMetadataToPage();
         }
-        if (RecordManager::passUniqueConstraintTest(table, r))
+        if (!still_need_check_unique_constraint || RecordManager::passUniqueConstraintTest(table, r))
         {
             if (r.haveSpaceToInsert())
             {
@@ -321,16 +372,34 @@ string recordExecute(Insert &table)
                         record >> int_value;
                         pack(int_value, insert_position);
                         insert_position += 4;
+#ifdef USE_INDEX
+                        if (!table.all_index_name[i].empty()) // index here
+                        {
+                            index_manager.insertIndex(table.all_index_name[i], int_value, INT, r.getCurrentPageIndex());
+                        }
+#endif
                         break;
                     case FLOAT:
                         float float_value;
                         record >> float_value;
                         pack(float_value, insert_position);
                         insert_position += 4;
+#ifdef USE_INDEX
+                        if (!table.all_index_name[i].empty()) // index here
+                        {
+                            index_manager.insertIndex(table.all_index_name[i], float_value, FLOAT, r.getCurrentPageIndex());
+                        }
+#endif
                         break;
                     case CHAR:
                         pack(table.row_value[i], insert_position);
                         insert_position += table.string_length[i];
+#ifdef USE_INDEX
+                        if (!table.all_index_name[i].empty()) // index here
+                        {
+                            index_manager.insertIndex(table.all_index_name[i], table.row_value[i], CHAR, r.getCurrentPageIndex());
+                        }
+#endif
                         break;
                     }
                 }
@@ -342,6 +411,7 @@ string recordExecute(Insert &table)
                 /*pack(new_end_of_tuple_offset, memory_page_ + 166);*/ // update end()
                 r.setEndofTupleOffset(new_end_of_tuple_offset);
                 r.tellBufferPageHasChanged();
+
                 return std::string("Query OK, 1 row affected");
             }
             else
@@ -618,11 +688,35 @@ bool indexExecute(CreateTable& table)
 
 bool indexExecute(DropTable& table)
 {
+    database->remove_file(table.table_name, false);
     return true;
 }
 
 string indexExecute(CreateIndex& table)
 {
+#ifdef USE_INDEX
+    IndexManager index_manager(table);
+    for (int i = 0; i < table.column_num; ++i)
+    {
+        if (table.column_name[i] == table.index_column_name)
+        {
+            switch (table.column_type[i])
+            {
+            case INT:
+                index_manager.createIndex(table.index_name, INT, sizeof(int));
+                break;
+            case FLOAT:
+                index_manager.createIndex(table.index_name, FLOAT, sizeof(float));
+                break;
+            case CHAR:
+                index_manager.createIndex(table.index_name, CHAR, table.string_length[i]);
+                break;
+            }
+            return "Create index successfully";
+        }
+    }
+    throw logic_error("Column name doesn't match");
+#endif
     return "Create index successfully";
 }
 

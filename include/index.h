@@ -14,18 +14,18 @@ class IndexManager{
 		~IndexManager();
 		//建立索引
 		//输入：索引名，属性类型，该类型长度 
-		void 		createIndex(std::string file_path, COLUMNTYPE type, int string_len);
+		void 		createIndex(const std::string& file_path, COLUMNTYPE type, int string_len);
 		//删除索引
 		//输入：索引名，属性类型
-		void 		dropIndex(std::string file_path, COLUMNTYPE type); 
+		void 		dropIndex(const std::string& file_path, COLUMNTYPE type); 
 		template 	<typename T> 
-		int 		findIndex(std::string file_path, T data, COLUMNTYPE type);
+		int 		findIndex(const std::string& file_path, T data, COLUMNTYPE type);
 		template 	<typename T> 
-		void 		insertIndex(std::string file_path, T data, COLUMNTYPE type, int block_id);
+		void 		insertIndex(const std::string& file_path, T data, COLUMNTYPE type, int block_id);
 		template 	<typename T> 
-		void 		deleteIndexByKey(std::string file_path, T data, COLUMNTYPE type);
+		void 		deleteIndexByKey(const std::string& file_path, T data, COLUMNTYPE type);
 		template 	<typename T> 
-		void 		searchWithinRange(std::string file_path, T dataA, T dataB, COLUMNTYPE type, std::vector<int>& values, int flag);
+		void 		searchWithinRange(const std::string& file_path, T dataA, T dataB, COLUMNTYPE type, std::vector<int>& values, int flag);
 	
 	private:
 		typedef 	std::map<std::string, BPTree<int> *> 			intMap;
@@ -40,7 +40,7 @@ class IndexManager{
 };
 
 template <typename T> 
-int IndexManager::findIndex(std::string file_path, T data, COLUMNTYPE type)
+int IndexManager::findIndex(const std::string& file_path, T data, COLUMNTYPE type)
 {
 	if(type == INT)
 	{
@@ -72,7 +72,7 @@ int IndexManager::findIndex(std::string file_path, T data, COLUMNTYPE type)
 }
 
 template <typename T>
-void IndexManager::insertIndex(std::string file_path, T data, COLUMNTYPE type, int block_id)
+void IndexManager::insertIndex(const std::string& file_path, T data, COLUMNTYPE type, int block_id)
 {
 	if(type == INT)
 	{
@@ -105,7 +105,7 @@ void IndexManager::insertIndex(std::string file_path, T data, COLUMNTYPE type, i
 }
 
 template <typename T>
-void IndexManager::deleteIndexByKey(std::string file_path, T data, COLUMNTYPE type)
+void IndexManager::deleteIndexByKey(const std::string& file_path, T data, COLUMNTYPE type)
 {
 	if(type == INT)
 	{
@@ -141,7 +141,7 @@ void IndexManager::deleteIndexByKey(std::string file_path, T data, COLUMNTYPE ty
 
 //给定文件名，数据类型的范围查找，dataA与dataB大小关系无所谓，flag = 0是默认，1是无视dataA，返回>dataB的结果，2是无视dataB 
 template <typename T>
-void IndexManager::searchWithinRange(std::string file_path, T dataA, T dataB, COLUMNTYPE type, std::vector<int>& values, int flag)
+void IndexManager::searchWithinRange(const std::string& file_path, T dataA, T dataB, COLUMNTYPE type, std::vector<int>& values, int flag)
 {
     if(type == INT) 
 	{

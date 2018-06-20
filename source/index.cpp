@@ -1,6 +1,5 @@
 #include "index.h"
 #include "buffer.h"
-#include "catalog.h"
 #include "OperationInput.h"
 #include "BPTree.h"
 #include <string>
@@ -19,42 +18,42 @@ IndexManager::IndexManager(const Table& table)
 	const int* sizes = table.string_length;
 	for(unsigned int i = 0; i < COLUMNMAXSIZE; i++)
 	{
-		if(indexs[i] != "") createIndex(indexs[i], types[i], sizes[i]);			
+		if(!indexs[i].empty()) createIndex(indexs[i], types[i], sizes[i]);			
 	}
 	//}	
 } 
 
 IndexManager::~IndexManager()
 {
-	for(intMap::iterator i_Int = indexIntMap.begin(); i_Int != indexIntMap.end(); i_Int++)
+	for (auto& i_Int : indexIntMap)
 	{
-		if(i_Int -> second)
+		if(i_Int.second)
 		{
-			i_Int -> second -> writeBack();
-			delete i_Int -> second;
+		    i_Int.second -> writeBack();
+			delete i_Int.second;
 		}
 	}
-	for(floatMap::iterator i_Float = indexFloatMap.begin(); i_Float != indexFloatMap.end(); i_Float++)
+	for (auto& i_Float : indexFloatMap)
 	{
-		if(i_Float -> second)
+		if(i_Float.second)
 		{
-			i_Float -> second -> writeBack();
-			delete i_Float -> second;
+		    i_Float.second->writeBack();
+			delete i_Float.second;
 		}
 	}
-	for(stringMap::iterator i_String = indexStringMap.begin(); i_String != indexStringMap.end(); i_String++)
+	for (auto& i_String : indexStringMap)
 	{
-		if(i_String -> second)
+		if(i_String.second)
 		{
-			i_String -> second -> writeBack();
-			delete i_String -> second;
+		    i_String.second->writeBack();
+			delete i_String.second;
 		}
 	}	
 }
 
-void IndexManager::createIndex(std::string file_path, COLUMNTYPE type, int string_len)
+void IndexManager::createIndex(const std::string& file_path, COLUMNTYPE type, int string_len)
 {
-	int degree = getBestDegree(type, string_len);
+    const int degree = getBestDegree(type, string_len);
 	
 	if(type == INT)
 	{
@@ -74,11 +73,11 @@ void IndexManager::createIndex(std::string file_path, COLUMNTYPE type, int strin
 	return;
 }
 
-void IndexManager::dropIndex(std::string file_path, COLUMNTYPE type)
+void IndexManager::dropIndex(const std::string& file_path, COLUMNTYPE type)
 {
 	if(type == INT)
 	{
-		intMap::iterator i_Int = indexIntMap.find(file_path);
+	    auto i_Int = indexIntMap.find(file_path);
 		if(i_Int == indexIntMap.end())
 		{
 			return;
@@ -91,7 +90,7 @@ void IndexManager::dropIndex(std::string file_path, COLUMNTYPE type)
 	}
 	else if(type == FLOAT)
 	{
-		floatMap::iterator i_Float = indexFloatMap.find(file_path);
+	    auto i_Float = indexFloatMap.find(file_path);
 		if(i_Float == indexFloatMap.end())
 		{
 			return;
@@ -104,7 +103,7 @@ void IndexManager::dropIndex(std::string file_path, COLUMNTYPE type)
 	}
 	else
 	{
-		stringMap::iterator i_String = indexStringMap.find(file_path);
+	    auto i_String = indexStringMap.find(file_path);
 		if(i_String == indexStringMap.end())
 		{
 			return;
