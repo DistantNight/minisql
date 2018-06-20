@@ -62,13 +62,13 @@
     <ClCompile Include="source\catalog.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="source\catalogManager.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="source\index.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="test\Interface.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="source\CatalogManager.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

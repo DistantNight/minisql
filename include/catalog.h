@@ -17,7 +17,7 @@ public:
 		int numberOfTable;
 
 	};
-	
+
 	struct index {
 		string nameOfIndex;
 		string tableOfIndex;
@@ -29,7 +29,7 @@ public:
 		vector<string> nameOfKey;
 		vector<string> nameOfType;
 		vector<int> isUnique;
-		
+
 		vector<string> nameOfIndex;
 		int numberOfRecord;
 		int lengthOfRecord;
@@ -46,31 +46,31 @@ public:
 	int indexNum;
 
 	catalogManager();
-	~catalogManager() {};
-	int isTableExist(string tablename);
-	int isIndexExist(string indexname);
-	int myprint(string tablename);
-	bool createTable(string nameOfTable, vector<string> nameOfKey, vector<string> nameOfType, vector<int> isUnique);
-	bool createTable(string nameOfTable, vector<string> nameOfKey, vector<string> nameOfType, vector<int> isUnique, string primaryKey);
-	bool deleteTableInfo(string nameOfTable);
-	bool deleteTableInfo(string nameOfTable, int d);
-	
-	
-	bool createIndex(string nameOfIndex, string tableOfIndex, string keyOfIndex);
-	bool deleteIndex(const string& nameOfIndex);
-	bool numberOfRecordAdd(const string& nameOfTable, int a);
-	
-	bool dropTable(string nameOfTable);
-	bool updateCatalog(); // TODO: execute before quit
+	~catalogManager() = default;
+	int isTableExist(const string& tablename);
+	int isIndexExist(const string& indexname, const string& tablename);
+	int myprint(const string& tablename);
+	int createTable(const string& nameOfTable, const vector<string>& nameOfKey, const vector<string>& nameOfType, vector<int> isUnique);
+	int createTable(const string& nameOfTable, const vector<string>& nameOfKey, const vector<string>& nameOfType, vector<int> isUnique, string primaryKey);
+	int deleteTableInfo(const string& nameOfTable);
+	int deleteTableInfo(const string& nameOfTable, int d);
+
+
+	int createIndex(const string& nameOfIndex, const string& tableOfIndex, const string& keyOfIndex);
+	int deleteIndex(const string& nameOfIndex);
+	int numberOfRecordAdd(const string& nameOfTable, int a);
+
+	int dropTable(const string& nameOfTable);
+	int updateCatalog();
 	int getFullLength(const string& nameOfTable);
-	int getRecordNum(string tableName);
-	int getLength(vector<string> x);
-	int getLength(string type);
-	
-	vector<string> nameOfKey(string nameOfTable);
-	vector<string> nameOfType(string nameOfTable);
-	vector<int> isUnique(string nameOfTable);
-	vector<string> nameOfIndex(string nameOfTable);
+	int getRecordNum(const string& tableName);
+	int getLength(vector<string> x) const;
+	int getLength(const string& type) const;
+
+	vector<string> nameOfKey(const string& nameOfTable);
+	vector<string> nameOfType(const string& nameOfTable);
+	vector<int> isUnique(const string& nameOfTable);
+	vector<string> nameOfIndex(const string& nameOfTable);
 
 
 

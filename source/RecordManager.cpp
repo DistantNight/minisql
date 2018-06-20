@@ -217,7 +217,7 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         return std::vector<std::string>();
     }
     std::vector<std::string> result(table_.column_num);
-    auto reading_position = begin() + tuple_i * tuple_size;
+    const auto begin_position = begin() + tuple_i * tuple_size;
 
     for (int i = 0; i < table_.column_num; ++i) // put values in to the table
     {
@@ -236,15 +236,15 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         switch (table_.column_type[i])
         {
         case INT:
-            value_int = unpackInt(&reading_position[offset]);
+            value_int = unpackInt(&begin_position[offset]);
             result.at(i) = std::to_string(value_int);
             break;
         case FLOAT:
-            value_float = unpackFloat(&reading_position[offset]);
+            value_float = unpackFloat(&begin_position[offset]);
             result.at(i) = std::to_string(value_float);
             break;
         case CHAR:
-            str = unpackString(&reading_position[offset], table_.string_length[i]);
+            str = unpackString(&begin_position[offset], table_.string_length[i]);
             result.at(i) = str;
             break;
         }
@@ -439,12 +439,6 @@ string recordExecute(Select &table)
     }
 
     RecordManager r(table);
-
-    /*map<string, int> column_name_to_index;
-    for (int i = 0; i < table.column_num; ++i)
-    {
-        column_name_to_index.insert(make_pair(table.column_name[i], i));
-    }*/
     
     r.toNextPage();
     if (r.isEmptyPage()) // new page, empty record
@@ -475,7 +469,6 @@ string recordExecute(Select &table)
 
     // begin sequential quering
     int result_tuple_num = 1; // 1 for the title
-
     do
     {
         const bool last_page = r.haveSpaceToInsert(); // if it has space to insert, then it must be the last page
@@ -552,7 +545,6 @@ string recordExecute(Select &table)
         }
         r.toNextPage();
     } while (true);
-    // const int tuple_size = unpackInt(memory_page + 160);
     
     // drawing header
     ostringstream table_border;
