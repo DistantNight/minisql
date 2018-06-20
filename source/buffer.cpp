@@ -233,6 +233,7 @@ void Buffer::close_file(fileInfo* file_node) {
 	blockInfo* iter = NULL;
 	for (iter = block_handle; iter->next; iter = iter->next);
 	iter->next = file_node->first_block;
+	file_node->first_block = nullptr;
 }
 
 void Buffer::write_back(string file_name, bool file_type, blockInfo* block_node) {
