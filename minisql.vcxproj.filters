@@ -68,7 +68,7 @@
     <ClCompile Include="test\Interface.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="source\CatalogManager.cpp">
+    <ClCompile Include="source\CatalogM.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
