@@ -35,7 +35,8 @@ class IndexManager{
 		intMap 		indexIntMap;
 		floatMap 	indexFloatMap;
 		stringMap 	indexStringMap;
-		
+
+
 		int 		getBestDegree(COLUMNTYPE type, int string_len);
 };
 
@@ -49,7 +50,7 @@ int IndexManager::findIndex(const std::string& file_path, T data, COLUMNTYPE typ
 		{
 			return -1;
 		}
-		else return i_Int -> second -> searchValueWithKey(data);
+		else return i_Int -> second -> searchValueWithKey(reinterpret_cast<int&>(data));
 	}
 	else if(type == FLOAT)
 	{
@@ -58,7 +59,7 @@ int IndexManager::findIndex(const std::string& file_path, T data, COLUMNTYPE typ
 		{
 			return -1;
 		}
-		else return i_Float -> second -> searchValueWithKey(data);
+		else return i_Float -> second -> searchValueWithKey(reinterpret_cast<float&>(data));
 	}
 	else
 	{
@@ -67,8 +68,9 @@ int IndexManager::findIndex(const std::string& file_path, T data, COLUMNTYPE typ
 		{
 			return -1;
 		}
-		else return i_String -> second -> searchValueWithKey(data);
+		else return i_String -> second -> searchValueWithKey(reinterpret_cast<string&>(data));
 	}
+
 }
 
 template <typename T>
@@ -81,7 +83,7 @@ void IndexManager::insertIndex(const std::string& file_path, T data, COLUMNTYPE 
 		{
 			return;
 		}
-		else i_Int -> second -> insertKey(data, block_id);
+		else i_Int -> second -> insertKey(reinterpret_cast<int&>(data), block_id);
 	}
 	else if(type == FLOAT)
 	{
@@ -90,7 +92,7 @@ void IndexManager::insertIndex(const std::string& file_path, T data, COLUMNTYPE 
 		{
 			return;
 		}
-		else i_Float -> second -> insertKey(data, block_id);
+		else i_Float -> second -> insertKey(reinterpret_cast<float&>(data), block_id);
 	}
 	else
 	{
@@ -99,9 +101,9 @@ void IndexManager::insertIndex(const std::string& file_path, T data, COLUMNTYPE 
 		{
 			return;
 		}
-		else i_String -> second -> insertKey(data, block_id);
+		else i_String -> second -> insertKey(reinterpret_cast<string&>(data), block_id);
 	}
-	return;
+    
 }
 
 template <typename T>

@@ -431,7 +431,7 @@ string recordExecute(Select &table)
     ostringstream query_result;
     
     vector<vector<string>> columns(table.column_num); // search result will store here for printing
-    vector<unsigned> columns_print_width(table.column_num, 0);
+    vector<size_t> columns_print_width(table.column_num, 0);
     for (int i = 0; i < table.column_num; ++i)
     {
         columns.at(i).push_back(table.column_name[i]);

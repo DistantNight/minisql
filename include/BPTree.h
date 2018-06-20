@@ -12,9 +12,9 @@
 #include "buffer.h"
 
 
-#define  SMALL_AMOUNT  			30                                  //å°‘äºè¿™ä¸ªæ•°é‡ï¼Œç›´æ¥éå† 
+#define  SMALL_AMOUNT  			30                                  //ÉÙÓÚÕâ¸öÊıÁ¿£¬Ö±½Ó±éÀú 
 
-const string ROOT = "./data/";										//è¿™ä¸ªç›®å½•ä¹‹åç»Ÿä¸€ä¸€ä¸‹,æ”¾ç´¢å¼•æ–‡ä»¶çš„ 
+const string ROOT = "./data/";										//Õâ¸öÄ¿Â¼Ö®ºóÍ³Ò»Ò»ÏÂ,·ÅË÷ÒıÎÄ¼şµÄ 
 extern Buffer* database;
 
 template <typename T>
@@ -23,10 +23,10 @@ void copyStr(char* p , int& offset , T data)
     std::stringstream stream;
     stream << data;
     std::string s = stream.str();
-    for(int i = 0; i < s.length(); i++, offset++) p[offset] = s[i];
+    for(decltype(s.length()) i = 0; i < s.length(); i++, offset++) p[offset] = s[i];
 }
 
-//B+æ ‘èŠ‚ç‚¹ç±»å®šä¹‰ 
+//B+Ê÷½ÚµãÀà¶¨Òå 
 
 template <typename T>
 class BPT_Node{
@@ -39,7 +39,7 @@ class BPT_Node{
 		BPT_Node*				next;			 
 
 		std::vector<T> 			keys;			 
-		std::vector<int>		values;    		//å…¶ä¸­valueæ˜¯æŒ‡è¯¥keyçš„æ•°æ®æ‰€å­˜æ”¾åœ¨çš„Block_num 
+		std::vector<int>		values;    		//ÆäÖĞvalueÊÇÖ¸¸ÃkeyµÄÊı¾İËù´æ·ÅÔÚµÄBlock_num 
 		std::vector<BPT_Node*> 	childs;			 
 
 	public:
@@ -77,7 +77,7 @@ class BPTree{
 		int 					degree;
 
 	public:
-		BPTree(std::string name, int degree);
+		BPTree(const std::string& name, int degree);
 		~BPTree();
 
 		int 					searchValueWithKey(T &key);
@@ -87,7 +87,7 @@ class BPTree{
 		void 					searchInRange(T &keyA, T &keyB, std::vector<int>& values, int flag);
 		void 					readAllData();
 		void 					writeBack();
-		void 					readFromDisk(char *ph, char* end);
+		void 					readFromDisk(const char *ph, char* end);
 		void 					printTree();
 
 	private:
@@ -95,21 +95,21 @@ class BPTree{
 		bool 					adjustAInsert(BPT node);
 		bool 					adjustADelete(BPT node);
 		void 					findLeafWithKey(BPT node, T key, tempSearch &tS);
-		void 					getFile(std::string file_path);
-		int 					getBlockNum(std::string file_name);	
+		void 					getFile(const std::string& file_path);
+		int 					getBlockNum(const std::string& file_name);	
 };		
 
 
 
 template <class T>
 BPT_Node<T>::BPT_Node(int degree, bool is_leaf):
-		num_of_key(0),
-		parent(NULL),
-		next(NULL),
+		degree(degree),
 		is_leaf(is_leaf),
-		degree(degree)
+		num_of_key(0),
+		parent(nullptr),
+		next(nullptr)
 {
-	for(unsigned int i = 0; i < degree + 1; i++)
+	for(int i = 0; i < degree + 1; i++)
 	{
 		childs.push_back(NULL);
 		keys.push_back(T());
@@ -119,12 +119,12 @@ BPT_Node<T>::BPT_Node(int degree, bool is_leaf):
 }
 
 template <class T>
-BPT_Node<T>::~BPT_Node(){}
+BPT_Node<T>::~BPT_Node() = default;
 
 template <class T>
 bool BPT_Node<T>::isRoot()
 {
-	return (parent == NULL);
+	return (parent == nullptr);
 }
 
 template <class T>
@@ -205,13 +205,13 @@ bool BPT_Node<T>::isKeyExist(T key, unsigned int &index)
 template <class T>
 BPT_Node<T>* BPT_Node<T>::cutNode(T &key)
 {
-	unsigned int minNodeAmount = (degree - 1) / 2;
-	BPT_Node* new_node = new BPT_Node(degree, this -> is_leaf);
+    const unsigned int minNodeAmount = (degree - 1) / 2;
+    auto* new_node = new BPT_Node(degree, this -> is_leaf);
 	
 	if(is_leaf)
 	{
 		key = keys[minNodeAmount + 1];
-		for(unsigned int i = minNodeAmount + 1; i < degree; i++)
+		for(int i = minNodeAmount + 1; i < degree; i++)
 		{
 			new_node -> keys[i - minNodeAmount - 1] = keys[i];
 			keys[i] = T();
@@ -228,13 +228,13 @@ BPT_Node<T>* BPT_Node<T>::cutNode(T &key)
 	else if(!is_leaf)
 	{
 		key = keys[minNodeAmount];
-		for(unsigned int i = minNodeAmount + 1; i < degree + 1; i++)
+		for(int i = minNodeAmount + 1; i < degree + 1; i++)
 		{
 			new_node -> childs[i - minNodeAmount - 1] = this -> childs[i];
 			new_node -> childs[i - minNodeAmount - 1] -> parent = new_node;
 			this -> childs[i] = NULL;
 		}
-		for(unsigned int i = minNodeAmount + 1; i < degree; i++)
+		for(int i = minNodeAmount + 1; i < degree; i++)
 		{
 			new_node -> keys[i - minNodeAmount - 1] = this -> keys[i];
 			this -> keys[i] = T();
@@ -260,7 +260,7 @@ unsigned int BPT_Node<T>::addKey(T &key)
 	else
 	{
 		unsigned int index = 0;
-		bool there_is = isKeyExist(key, index);
+	    const bool there_is = isKeyExist(key, index);
 		if(there_is) return -1;
 		else
 		{
@@ -272,7 +272,6 @@ unsigned int BPT_Node<T>::addKey(T &key)
 			return index;
 		}
 	}
-	return 0;
 }
 
 template <class T>
@@ -304,7 +303,6 @@ unsigned int BPT_Node<T>::addKey(T &key, int value)
 			return index;
 		}
 	}
-	return 0;
 }
 
 template <class T>
@@ -333,7 +331,6 @@ bool BPT_Node<T>::deleteKeyByIndex(unsigned int index)
 		num_of_key--;
 		return true;
 	}
-	return false;
 }
 
 template <class T>
@@ -365,13 +362,13 @@ bool BPT_Node<T>::findInRange(unsigned int index, std:: vector<int>& vals)
 }
 
 template <class T>
-BPTree<T>::BPTree(std::string name, int degree):
+BPTree<T>::BPTree(const std::string& name, int degree):
 	file_name(name),
+	root(nullptr),
+	leaf_head(nullptr),
 	key_amount(0),
 	level(0),
 	node_amount(0),
-	root(NULL),
-	leaf_head(NULL),
 	degree(degree)
 {
 	initBPT();
@@ -434,7 +431,7 @@ void BPTree<T>::findLeafWithKey(BPT node, T key, tempSearch &tS)
 			findLeafWithKey(node -> childs[index], key, tS);
 		}
 	}
-	return;
+
 }
 
 template <class T>
@@ -457,7 +454,6 @@ bool BPTree<T>::insertKey(T &key, int value)
 		key_amount++;
 		return true;
 	}
-	return false;
 }
 
 template <class T>
@@ -574,7 +570,7 @@ bool BPTree<T>::deleteKey(T &key)
 template <class T>
 bool BPTree<T>::adjustADelete(BPT node)
 {
-	unsigned int minNodeAmount = (degree - 1) / 2;
+    const unsigned int minNodeAmount = (degree - 1) / 2;
 	if(((node -> is_leaf) && (node -> num_of_key >= minNodeAmount)) || 
 		 ((degree != 3) && (!node -> is_leaf) && (node -> num_of_key >= minNodeAmount - 1)) ||
 			 ((degree == 3) && (!node -> is_leaf) && (node -> num_of_key < 0)))
@@ -607,7 +603,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 	else
 	{
 		BPT parent = node -> parent;
-		BPT brother = NULL;
+		BPT brother = nullptr;
 		
 		if(node -> is_leaf)
 		{
@@ -628,7 +624,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 					node -> values[0] = brother -> values[brother -> num_of_key - 1];
 					brother -> deleteKeyByIndex(brother -> num_of_key - 1);
 					
-					node -> num_of_key++;
+					++node -> num_of_key;
 					parent -> keys[index] = node -> keys[0];
 					return true;
 				}
@@ -659,7 +655,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 				{
 					node -> keys[node -> num_of_key] = brother -> keys[0];
 					node -> values[node -> num_of_key] = brother -> values[0];
-					node -> num_of_key++;
+					++node -> num_of_key;
 					brother -> deleteKeyByIndex(0);
 					
 					if(parent -> childs[0] == node) parent -> keys[0] = brother -> keys[0];
@@ -701,7 +697,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 					}
 					node -> childs[0] = brother -> childs[brother -> num_of_key];
 					node -> keys[0] = parent -> keys[index];
-					node -> num_of_key++;
+					++node -> num_of_key;
 					
 					parent -> keys[index] = brother -> keys[brother -> num_of_key - 1];
 					
@@ -717,7 +713,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 				{
 					brother -> keys[brother -> num_of_key] = parent -> keys[index];
 					parent -> deleteKeyByIndex(index);
-					brother -> num_of_key++;
+					++brother -> num_of_key;
 					
 					for(unsigned int i = 0; i < node -> num_of_key; i++)
 					{
@@ -745,7 +741,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 					node -> childs[node -> num_of_key + 1] = brother -> childs[0];
 					node -> keys[node -> num_of_key] = brother -> keys[0];
 					node -> childs[node -> num_of_key + 1] -> parent = node;
-					node -> num_of_key++;
+					++node -> num_of_key;
 					
 					if(node == parent -> childs[0]) parent -> keys[0] = brother -> keys[0];
 					else parent -> keys[index + 1] = brother -> keys[0];
@@ -761,7 +757,7 @@ bool BPTree<T>::adjustADelete(BPT node)
 					if(node == parent -> childs[0]) parent -> deleteKeyByIndex(0);
 					else parent -> deleteKeyByIndex(index + 1);
 					
-					node -> num_of_key++;
+					++node -> num_of_key;
 					
 					for(unsigned int i = 0; i < brother -> num_of_key; i++)
 					{
@@ -805,9 +801,9 @@ void BPTree<T>::printTree()
 {
 	int flag = 0;
 	BPT p = leaf_head;
-	while(p != NULL)
+	while(p != nullptr)
 	{
-		if(flag) std::cout << "â†“" << std::endl;
+		if(flag) std::cout << "¡ı" << std::endl;
 		flag = 1;
 		p -> printNode();
 		p = p -> nextLeafNode();
@@ -828,7 +824,7 @@ void BPT_Node<T>::printNode()
 }
 
 template <class T>
-void BPTree<T>::getFile(std::string file_path) 
+void BPTree<T>::getFile(const std::string& file_path) 
 {
     FILE* f = fopen(file_path.c_str() , "r");
     if (f == NULL) 
@@ -842,7 +838,7 @@ void BPTree<T>::getFile(std::string file_path)
 }
 
 template <class T>
-int BPTree<T>::getBlockNum(std::string file_name)
+int BPTree<T>::getBlockNum(const std::string& file_name)
 {
     Buffer& BufferManager = *database;
     blockInfo* p;
@@ -861,15 +857,15 @@ template <class T>
 void BPTree<T>::writeBack()
 {
     Buffer& BufferManager = *database;
-    std::string file_path = ROOT + file_name;
+    const std::string file_path = ROOT + file_name;
 	getFile(file_path);
-	int block_num = getBlockNum(file_name);
+    const int block_num = getBlockNum(file_name);
 	
 	BPT temp_head = leaf_head;
     int i;
     unsigned j;
 	
-	for(i = 0, j = 0; temp_head != NULL; i++)
+	for(i = 0, j = 0; temp_head != nullptr; i++)
 	{
 		char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
 		int offset = 0;
@@ -903,7 +899,7 @@ template <class T>
 void BPTree<T>::readAllData()
 {
     Buffer& BufferManager = *database;
-    std::string file_path = ROOT + file_name;
+    const std::string file_path = ROOT + file_name;
     getFile(file_path);
     int block_num = getBlockNum(file_name);
 
@@ -916,7 +912,7 @@ void BPTree<T>::readAllData()
 }
 
 template <class T>
-void BPTree<T>::readFromDisk(char* ph, char* end)
+void BPTree<T>::readFromDisk(const char* ph, char* end)
 {
     T key;
     int value;
