@@ -11,11 +11,11 @@
 template <typename T> 
 class IndexManager{
 	public:
-		IndexManager(std::string table_name);
+		IndexManager(const Table& table);
 		~IndexManager();
 		//建立索引
 		//输入：索引名，属性类型，该类型长度 
-		void 		createIndex(std::string file_path, std::string type, int string_len);
+		void 		createIndex(std::string file_path, COLUMNTYPE type, int string_len);
 		//删除索引
 		//输入：索引名，属性类型
 		void 		dropIndex(std::string file_path, COLUMNTYPE type); 
@@ -33,7 +33,7 @@ class IndexManager{
 		floatMap 	indexFloatMap;
 		stringMap 	indexStringMap;
 		
-		int 		getBestDegree(std::string type, int string_len);
+		int 		getBestDegree(COLUMNTYPE type, int string_len);
 };
 
 #endif

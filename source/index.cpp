@@ -1,31 +1,34 @@
 #include "index.h"
 #include "buffer.h"
 #include "catalog.h"
-#include "operationinput.h"
+#include "OperationInput.h"
 #include "BPTree.h"
 #include <string>
 #include <vector>
 #include <map>
 
 template <typename T> 
-IndexManager<T>::IndexManager(std::string table_name)
+IndexManager<T>::IndexManager(const Table& table)
 {
-	catalogManager catalog;
-	if(catalog.isTableExist(table_name))
+	//catalogManager catalog;
+	//if(catalog.isTableExist(Table.table_name))
+	//{
+	//vector<std::string> indexs = catalog.nameOfIndex(table_name);
+	//vector<std::string> types = catalog.nameOfType(table_name);
+	const string* indexs = table.all_index_name;
+	const ColumnType* types = table.column_type;
+	const int* sizes = table.string_length;
+	for(unsigned int i = 0; i < COLUMNMAXSIZE; i++)
 	{
-		vector<std::string> indexs = catalog.nameOfIndex(table_name);
-		vector<std::string> types = catalog.nameOfType(table_name);
-		for(unsigned int i = 0; i < indexs.size(); i++)
-		{
-			if(indexs[i][0] != '*') createIndex(indexs[i], types[i], catalog.getLength(types[i]));			
-		}
-	}	
+		if(indexs[i] != "") createIndex(indexs[i], types[i], sizes[i]);			
+	}
+	//}	
 } 
 
 template <typename T> 
 IndexManager<T>::~IndexManager()
 {
-	for(intMap::iterator i_Int = indexIntMap.begin(); i_Int != indexIntMap.end(); i_Int++)
+	for(intMap::iterator i_Int = indexIntMap.begin(); i_Int != indexIntMap.end(); ++i_Int)
 	{
 		if(i_Int -> second)
 		{
@@ -33,7 +36,7 @@ IndexManager<T>::~IndexManager()
 			delete i_Int -> second;
 		}
 	}
-	for(floatMap::iterator i_Float = indexFloatMap.begin(); i_Float != indexFloatMap.end(); i_Float++)
+	for(floatMap::iterator i_Float = indexFloatMap.begin(); i_Float != indexFloatMap.end(); ++i_Float)
 	{
 		if(i_Float -> second)
 		{
@@ -41,7 +44,7 @@ IndexManager<T>::~IndexManager()
 			delete i_Float -> second;
 		}
 	}
-	for(stringMap::iterator i_String = indexStringMap.begin(); i_String != indexStringMap.end(); i_String++)
+	for(stringMap::iterator i_String = indexStringMap.begin(); i_String != indexStringMap.end(); ++i_String)
 	{
 		if(i_String -> second)
 		{
@@ -52,16 +55,16 @@ IndexManager<T>::~IndexManager()
 }
 
 template <typename T> 
-void IndexManager<T>::createIndex(std::string file_path, std::string type, int string_len)
+void IndexManager<T>::createIndex(std::string file_path, COLUMNTYPE type, int string_len)
 {
 	int degree = getBestDegree(type, string_len);
 	
-	if(type == "INT")
+	if(type == INT)
 	{
 		BPTree<int> *BPT = new BPTree<int>(file_path, degree);
 		indexIntMap.insert(intMap::value_type(file_path, BPT));
 	}
-	else if(type == "FLOAT")
+	else if(type == FLOAT)
 	{
 		BPTree<float> *BPT = new BPTree<float>(file_path, degree);
 		indexFloatMap.insert(floatMap::value_type(file_path, BPT));
@@ -218,14 +221,9 @@ void IndexManager<T>::deleteIndexByKey(std::string file_path, T data, COLUMNTYPE
 }
 
 template <typename T> 
-int IndexManager<T>::getBestDegree(std::string type, int string_len)
-{
-	int key_size;
-	if(type == "INT") key_size = sizeof(int);
-	else if(type == "FLOAT") key_size = sizeof(float);
-	else if(type == "CHAR") key_size = string_len;
-	
-	int degree = (BLOCK_LEN - sizeof(int)) / (key_size + sizeof(int));
+int IndexManager<T>::getBestDegree(COLUMNTYPE type, int string_len)
+{	
+	int degree = (BLOCK_LEN - sizeof(int)) / (string_len + sizeof(int));
 	if(degree % 2 == 0) degree--;
 	return degree;
 }

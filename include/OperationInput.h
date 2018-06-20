@@ -33,7 +33,7 @@ public:
 	bool is_unique[COLUMNMAXSIZE];
 	string primary_key;
 	int exist_index_num;
-	vector<string> exist_index_name;
+	string all_index_name[COLUMNMAXSIZE];
 public:
 	Table()
 	{
