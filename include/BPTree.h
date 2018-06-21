@@ -855,11 +855,11 @@ void BPTree<T>::writeBack()
         for (j = 0; j < temp_head->num_of_key; j++)
         {
             ph[offset++] = '*';
-            ph[offset++] = ' ';
+            ph[offset++] = ',';
             copyStr(ph, offset, temp_head->keys[j]);
-            ph[offset++] = ' ';
+            ph[offset++] = ',';
             copyStr(ph, offset, temp_head->values[j]);
-            ph[offset++] = ' ';
+            ph[offset++] = ',';
         }
         ph[offset] = '\0';
         BufferManager.set_dirty(BufferManager.get_file_block(file_name, 1, i), true);
@@ -905,7 +905,7 @@ void BPTree<T>::readFromDisk(const char* ph, char* end)
             char temp[100];
             int j;
 
-            for (j = 0; i < BLOCK_LEN && ph[i] != ' '; i++) temp[j++] = ph[i];
+            for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
             std::string sa(temp);
             std::stringstream streama(sa);
@@ -913,7 +913,7 @@ void BPTree<T>::readFromDisk(const char* ph, char* end)
             memset(temp, 0, sizeof(temp));
             i++;
 
-            for (j = 0; i < BLOCK_LEN && ph[i] != ' '; i++) temp[j++] = ph[i];
+            for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
             std::string sb(temp);
             std::stringstream streamb(sb);
