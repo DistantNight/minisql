@@ -7,16 +7,19 @@
 #include "catalog.h"
 #include "buffer.h"
 using namespace std;
-catalogManager x;
-Buffer* database;
+catalogManager *catalog_manager = nullptr;
+Buffer* database = nullptr;
 int main()
 {
     Buffer d;
     database = &d;
+    catalogManager c;
+    catalog_manager = &c;
+
 	// logInterface();
 	execInterface();
 	
-    x.updateCatalog();
+    c.updateCatalog();
 	system("pause");
 	return 0;
 }

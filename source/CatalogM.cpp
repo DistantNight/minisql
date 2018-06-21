@@ -7,10 +7,11 @@
 
 using namespace std;
 class catalogManager;
-extern catalogManager x;
+extern catalogManager *catalog_manager;
 
 bool getTableInfo(Table & d)
 {
+    catalogManager& x = *catalog_manager;
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {
@@ -89,6 +90,7 @@ bool getTableInfo(Table & d)
 
 string catalogExecute(CreateTable & b)
 {
+    catalogManager& x = *catalog_manager;
     vector<string> colname;
     colname.reserve(b.column_num);
     for (int i = 0; i < b.column_num; i++)
@@ -142,6 +144,7 @@ string catalogExecute(CreateTable & b)
 
 string catalogExecute(DropTable & c)
 {
+    catalogManager& x = *catalog_manager;
     const int judge = x.isTableExist(c.table_name);
     if (judge == 0)
     {
@@ -225,6 +228,7 @@ string catalogExecute(DropTable & c)
 bool catalogExecute(CreateIndex &d)
 {// need tablename indexname index_column_name
 
+    catalogManager& x = *catalog_manager;
     int judge = x.isIndexExist(d.index_name, d.table_name);
     if (judge == 1)
     {
@@ -311,7 +315,7 @@ bool catalogExecute(CreateIndex &d)
 
 bool catalogExecute(DropIndex &d)
 {
-
+    catalogManager& x = *catalog_manager;
     int judge = x.isIndexExist(d.index_name, d.table_name);
     if (judge = 0)
     {
@@ -397,6 +401,7 @@ bool catalogExecute(DropIndex &d)
 
 bool catalogExecute(Insert &d)
 {
+    catalogManager& x = *catalog_manager;
     int j = x.isTableExist(d.table_name);
     if (j == 0)
     {
@@ -483,6 +488,7 @@ bool catalogExecute(Insert &d)
 }
 bool catalogExecute(Delete &d)
 {
+    catalogManager& x = *catalog_manager;
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {
@@ -571,6 +577,7 @@ bool catalogExecute(Delete &d)
 }
 bool catalogExecute(Select &d)
 {
+    catalogManager& x = *catalog_manager;
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {

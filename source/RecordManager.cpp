@@ -788,8 +788,9 @@ string recordExecute(Delete &table) // delete
     return deleting_result.str();
 }
 
-bool recordExecute(DropTable &t)
+bool recordExecute(DropTable &table)
 {
+    database->remove_file(table.table_name, false);
     return true;
 }
 
@@ -800,7 +801,6 @@ bool indexExecute(CreateTable& table)
 
 bool indexExecute(DropTable& table)
 {
-    database->remove_file(table.table_name, false);
     return true;
 }
 

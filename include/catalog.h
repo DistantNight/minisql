@@ -25,14 +25,14 @@ public:
 	};
 	struct table {
 		string nameOfTable;
-		int numberOfKey;
+		int numberOfKey = 0;
 		vector<string> nameOfKey;
 		vector<string> nameOfType;
 		vector<int> isUnique;
 
 		vector<string> nameOfIndex;
-		int numberOfRecord;
-		int lengthOfRecord;
+		int numberOfRecord = 0;
+		int lengthOfRecord = 0;
 		string primaryKey;
 
 

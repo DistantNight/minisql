@@ -12,7 +12,7 @@ catalogManager::catalogManager() :tableNum(0), indexNum(0)
     ifstream f("./data//catalog//db.info");
     if (!f)
     {
-        cout << "error------cant open db.catlog" << endl;
+        cout << "CatalogManager ERROR------cant open db.catlog" << endl;
         exit(0);
     }
 
@@ -23,7 +23,7 @@ catalogManager::catalogManager() :tableNum(0), indexNum(0)
         ifstream t("./data//catalog//table.info");
         if (!t)
         {
-            cout << "error------cant open table.catlog" << endl;
+            cout << "CatalogManager ERROR------cant open table.catlog" << endl;
             exit(0);
         }
         t >> temp;
@@ -66,12 +66,20 @@ catalogManager::catalogManager() :tableNum(0), indexNum(0)
                 Ta.numberOfRecord = x;
                 Ta.lengthOfRecord = getFullLength(Ta.nameOfTable);
                 t >> temp;
+                if (strcmp(temp, "!end") == 0)
+                {
+                    myt.push_back(Ta);
+                    break;
+                }
+                else if (strcmp(temp, "!start") == 0)
+                {
+                    myt.push_back(Ta);
+                    continue;
+                }
                 Ta.primaryKey.assign(temp);
 
                 myt.push_back(Ta);
-
             }
-
             t >> temp;
         }
         if (indexNum != 0)
