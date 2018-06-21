@@ -8,10 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <typeinfo>
-
 #include "buffer.h"
-
 
 #define  SMALL_AMOUNT  			30                                  //少于这个数量，直接遍历 
 
@@ -88,7 +85,7 @@ public:
     void 					readAllData();
     void 					writeBack();
     void 					readFromDisk(const char *ph, char* end);
-    void 					printTree();
+    void 					printTree() const;
 
 private:
     void 					initBPT();
@@ -465,7 +462,7 @@ bool BPTree<T>::adjustAInsert(BPT node)
     if (node->isRoot())
     {
         BPT root = new BPT_Node<T>(degree, false);
-        if (root == NULL) return false;
+        if (root == nullptr) return false;
         else
         {
             level++;
@@ -493,7 +490,6 @@ bool BPTree<T>::adjustAInsert(BPT node)
         }
         return true;
     }
-    return false;
 }
 
 template <class T>
@@ -504,8 +500,7 @@ int BPTree<T>::searchValueWithKey(T &key)
     findLeafWithKey(root, key, tS);
 
     if (!tS.is_exist) return -1;
-    else return tS.temp_node->values[tS.temp_index];
-
+    return tS.temp_node->values[tS.temp_index];
 }
 
 template <class T>
@@ -563,7 +558,6 @@ bool BPTree<T>::deleteKey(T &key)
             }
         }
     }
-    return false;
 }
 
 template <class T>
@@ -796,7 +790,7 @@ void BPTree<T>::dropBPT(BPT node)
 }
 
 template <class T>
-void BPTree<T>::printTree()
+void BPTree<T>::printTree() const
 {
     int flag = 0;
     BPT p = leaf_head;
@@ -870,9 +864,9 @@ void BPTree<T>::writeBack()
 
     while (i < block_num)
     {
-        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
+        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, true, i));
         memset(ph, 0, BLOCK_LEN);
-        BufferManager.set_dirty(BufferManager.get_file_block(file_name, 1, i), true);
+        BufferManager.set_dirty(BufferManager.get_file_block(file_name, true, i), true);
         i++;
     }
     return;
@@ -887,7 +881,7 @@ void BPTree<T>::readAllData()
     if (block_num <= 0) block_num = 1;
     for (int i = 0; i < block_num; i++)
     {
-        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, 1, i));
+        char* ph = BufferManager.get_content(BufferManager.get_file_block(file_name, true, i));
         readFromDisk(ph, ph + BLOCK_LEN);
     }
 }
@@ -908,19 +902,48 @@ void BPTree<T>::readFromDisk(const char* ph, char* end)
 
             for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
-            if(typeid(key) == typeid(std::string)) key = temp;
-            else
-            {
-            	std::string sa(temp);
-            	std::stringstream streama(sa);
-            	streama >> key;
-			} 
+
+            const std::string sa(temp);
+            std::stringstream streama(sa);
+            streama >> key;
+			
             memset(temp, 0, sizeof(temp));
             i++;
 
             for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
-            std::string sb(temp);
+            const std::string sb(temp);
+            std::stringstream streamb(sb);
+            streamb >> value;
+
+            insertKey(key, value);
+        }
+}
+
+template <>
+inline void BPTree<std::string>::readFromDisk(const char* ph, char* end)
+{
+    int value;
+
+    for (int i = 0; i < BLOCK_LEN; i++)
+        if (ph[i] != '*') return;
+        else
+        {
+            i += 2;
+            char temp[100];
+            int j;
+
+            for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
+            temp[j] = '\0';
+            
+            std::string key = temp;
+                      
+            memset(temp, 0, sizeof(temp));
+            i++;
+
+            for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
+            temp[j] = '\0';
+            const std::string sb(temp);
             std::stringstream streamb(sb);
             streamb >> value;
 
@@ -969,7 +992,7 @@ void BPTree<T>::searchInRange(T &keyA, T &keyB, std::vector<int>& values, int fl
         tempSearch tSA, tSB;
         findLeafWithKey(root, keyA, tSA);
         findLeafWithKey(root, keyB, tSB);
-        bool finished = false;
+        bool finished;
         unsigned int index;
         if (keyA <= keyB)
         {
@@ -999,7 +1022,7 @@ void BPTree<T>::searchInRange(T &keyA, T &keyB, std::vector<int>& values, int fl
 
     std::sort(values.begin(), values.end());
     values.erase(unique(values.begin(), values.end()), values.end());
-    return;
+
 }
 
 #endif

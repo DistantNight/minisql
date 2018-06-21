@@ -14,7 +14,7 @@
 #include "buffer.h"
 #include "index.h"
 
-//#define USE_INDEX
+#define USE_INDEX
 
 extern Buffer* database;
 using namespace std;
@@ -794,45 +794,54 @@ bool recordExecute(DropTable &table)
     return true;
 }
 
-bool indexExecute(CreateTable& table)
-{
-    return true;
-}
-
-bool indexExecute(DropTable& table)
-{
-    return true;
-}
-
 string indexExecute(CreateIndex& table)
 {
 #ifdef USE_INDEX
     IndexManager index_manager(table);
-    for (int i = 0; i < table.column_num; ++i)
+    int i;
+    for (i = 0; i < table.column_num; ++i)
     {
-        if (table.column_name[i] == table.index_column_name)
+        if (table.index_column_name == table.column_name[i])
         {
+            break;
+        }
+    }
+    if (i >= table.column_num || !table.is_unique[i])
+    {
+        throw runtime_error("Index on this column is not valid");
+    }
+    RecordManager r(table);
+    bool last_page = false;
+    while (!last_page)
+    {
+        r.toNextPage();
+        if (r.haveSpaceToInsert())
+        {
+            last_page = true;
+        }
+        for (int j = 0; j < r.getEndofTupleOffset() / r.tuple_size; ++j)
+        {
+
+            std::istringstream record(r.getTuple(j).at(i));
             switch (table.column_type[i])
             {
             case INT:
-                index_manager.createIndex(table.index_name, INT, sizeof(int));
+                int int_value;
+                record >> int_value;
+                index_manager.insertIndex(table.all_index_name[i], int_value, INT, r.getCurrentPageIndex());
                 break;
             case FLOAT:
-                index_manager.createIndex(table.index_name, FLOAT, sizeof(float));
+                float float_value;
+                record >> float_value;
+                index_manager.insertIndex(table.all_index_name[i], float_value, FLOAT, r.getCurrentPageIndex());
                 break;
             case CHAR:
-                index_manager.createIndex(table.index_name, CHAR, table.string_length[i]);
+                index_manager.insertIndex(table.all_index_name[i], r.getTuple(j).at(i), CHAR, r.getCurrentPageIndex());
                 break;
             }
-            return "Create index successfully";
-        }
+        }       
     }
-    throw logic_error("Column name doesn't match");
+
 #endif
     return "Create index successfully";
-}
-
-string indexExecute(DropIndex& table)
-{
-    return "Drop index successfully";
 }

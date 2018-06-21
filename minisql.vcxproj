@@ -30,6 +30,7 @@
     <ClInclude Include="include\Serialize.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="source\API_index.cpp" />
     <ClCompile Include="source\CatalogM.cpp" />
     <ClCompile Include="source\catalog.cpp" />
     <ClCompile Include="source\index.cpp" />
