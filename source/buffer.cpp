@@ -33,7 +33,7 @@ fileInfo* Buffer::get_file_info(string file_name, bool file_type) {
 
 	if (!iter) { //文件未打开
 		if (total_file < MAX_FILE_ACTIVE) { // 可以打开文件
-			file_pre->next = new fileInfo(file_name, 0);
+			file_pre->next = new fileInfo(file_name, file_type);
 			iter = file_pre->next;
 
 			//更新LRU_file_list
