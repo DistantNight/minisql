@@ -8,6 +8,7 @@
 #include <fstream>
 #include <sstream>
 #include <iomanip>
+#include <typeinfo>
 
 #include "buffer.h"
 
@@ -907,9 +908,13 @@ void BPTree<T>::readFromDisk(const char* ph, char* end)
 
             for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
-            std::string sa(temp);
-            std::stringstream streama(sa);
-            streama >> key;
+            if(typeid(key) == typeid(std::string)) key = temp;
+            else
+            {
+            	std::string sa(temp);
+            	std::stringstream streama(sa);
+            	streama >> key;
+			} 
             memset(temp, 0, sizeof(temp));
             i++;
 
