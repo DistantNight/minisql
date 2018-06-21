@@ -46,35 +46,36 @@ void logInterface()
 	bool isLog = false;
 	string user_name, user_password;
 
-
 	while (!isLog)
 	{
-		cout << "Enter the user name:";
+		cout << "Enter the user name: ";
 		getline(cin, user_name);
-		cout << "Enter the password:";
+		cout << "Enter the password: ";
 		getline(cin, user_password);
 		if (user_name == root_name && user_password == root_password)
 		{
 			isLog = true;
 		}
-
+		else
+		{
+            cout << "Wrong user name or password" << endl;
+		}
 	}
-	cout << "Welcome to the MiniSQL monitor. Commands end with ;." << endl;
+	cout << "Welcome to the MiniSQL. All commands end with ';'" << endl;
 
 }
 
 //输入执行语句的功能界面
 void execInterface()
 {
-	int operation_type = 0;
-	bool isQuit = false;
-	string sql_string, temp;
-	string space(" ");
+    bool isQuit = false;
+	string temp;
+    const string space(" ");
 
 	while (!isQuit)
 	{
-		sql_string = "";
-		cout << "MiniSQL> ";
+		string sql_string;
+		cout << "\nMiniSQL> ";
 		getline(cin, sql_string);
 		while (!isSqlEnd(sql_string))
 		{
@@ -83,7 +84,7 @@ void execInterface()
 			sql_string += space;
 			sql_string += temp;
 		}
-		operation_type = sqlConvert(sql_string);
+	    const int operation_type = sqlConvert(sql_string);
 		if (operation_type == 60)
 		{
 			isQuit = true;
@@ -95,14 +96,13 @@ void execInterface()
 //对输入sql语句的翻译模块
 int sqlConvert(string &sql)
 {
-	int pos_space, pos_end;
-	int opt;
+    int opt;
 	string temp;
 
 	removeSpace(sql);
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
-	if (pos_space < 0)
+    const auto pos_space = sql.find(' ');
+    const auto pos_end = sql.find(';');
+	if (pos_space == string::npos)
 	{
 		temp = sql.substr(0, pos_end);
 		if (temp == lag_quit)
@@ -171,341 +171,318 @@ int sqlConvert(string &sql)
 int createConvert(string &sql)
 {
 	int opt;
-	int pos_space, pos_end;
-	string temp;
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
-	if (pos_space < 0)
+    const auto pos_space = sql.find(' ');
+	// int pos_end = sql.find(';');
+	if (pos_space == string::npos)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
 		return -1;
 	}
-	else
-	{
-		temp = sql.substr(0, pos_space);
-		sql.erase(0, pos_space + 1);
-		removeSpace(sql);
-		if (temp == lag_index)
-		{
-			opt = createIndexConvert(sql);
-		}
-		else if (temp == lag_table)
-		{
-			opt = createTableConvert(sql);
-		}
-		else
-		{
-			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-			return -1;
-		}
-		return opt;
-	}
 
+    const string temp = sql.substr(0, pos_space);
+    sql.erase(0, pos_space + 1);
+    removeSpace(sql);
+    if (temp == lag_index)
+    {
+        opt = createIndexConvert(sql);
+    }
+    else if (temp == lag_table)
+    {
+        opt = createTableConvert(sql);
+    }
+    else
+    {
+        cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+        return -1;
+    }
+    return opt;
 }
 
 //对create index语句的翻译模块
 int createIndexConvert(string &sql)
 {
-	int opt = 10;
-	int pos_space, pos_end, pos;
-	string temp;
+	// int opt = 10;
+    int pos_space = sql.find(' ');
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
-
-	if (pos_space < 0)
+    if (pos_space < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
 		return -1;
 	}
-	else
-	{
-		temp = sql.substr(0, pos_space);
-		sql.erase(0, pos_space + 1);
-		removeSpace(sql);
-		CreateIndex CI;
-		CI.index_name = temp;
 
-		pos_space = sql.find(' ');
-		pos_end = sql.find(';');
-		if (pos_space < 0)
-		{
-			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-			return -1;
-		}
-		else
-		{
-			temp = sql.substr(0, pos_space);
-			sql.erase(0, pos_space + 1);
-			removeSpace(sql);
+    string temp = sql.substr(0, pos_space);
+    sql.erase(0, pos_space + 1);
+    removeSpace(sql);
+    CreateIndex CI;
+    CI.index_name = temp;
 
-			if (temp == lag_on)
-			{
-				pos_space = sql.find(' ');
-				pos = sql.find('(');
-				pos_end = sql.find(';');
-				if (pos < 0)
-				{
-					cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
-				else
-				{
-					if (pos_space < 0)
-					{
-						temp = sql.substr(0, pos);
-						sql.erase(0, pos + 1);
-						CI.table_name = temp;
-						pos = sql.find(')');
-						if (pos < 0)
-						{
-							cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-							return -1;
-						}
-						else
-						{
-							temp = sql.substr(0, pos);
-							sql.erase(0, pos + 1);
-							CI.index_column_name = temp;
-							if (sql[0] == ';')
-							{
-								if (true == catalogExecute(CI))
-								{
-									temp = indexExecute(CI);
-									cout << temp << endl;
-								}
-							}
-							else
-							{
-								cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-								return -1;
-							}
-						}
-					}
-					else
-					{
-						if (pos_space < pos)
-						{
-							temp = sql.substr(0, pos_space);
-							sql.erase(0, pos_space + 1);
-							removeSpace(sql);
-							CI.table_name = temp;
+    pos_space = sql.find(' ');
+    if (pos_space < 0)
+    {
+        cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+        return -1;
+    }
 
-							if (sql[0] == '(')
-							{
-								sql.erase(0, 1);
-								pos_space = sql.find(' ');
-								pos = sql.find(')');
+    temp = sql.substr(0, pos_space);
+    sql.erase(0, pos_space + 1);
+    removeSpace(sql);
 
-								if (pos < 0)
-								{
-									cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-									return -1;
-								}
-								else
-								{
-									if (pos_space < 0)
-									{
-										temp = sql.substr(0, pos);
-										sql.erase(0, pos + 1);
-										CI.index_column_name = temp;
-										if (sql[0] == ';')
-										{
-											if (true == catalogExecute(CI))
-											{
-												temp = indexExecute(CI);
-												cout << temp << endl;
-											}
-										}
-										else
-										{
-											cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-											return -1;
-										}
-									}
-									else
-									{
-										if (pos_space > pos)
-										{
-											temp = sql.substr(0, pos);
-											sql.erase(0, pos + 1);
-											removeSpace(sql);
-											CI.index_column_name = temp;
+    if (temp == lag_on)
+    {
+        pos_space = sql.find(' ');
+        int pos = sql.find('(');
+        // int pos_end = sql.find(';');
+        if (pos < 0)
+        {
+            cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+            return -1;
+        }
 
-											if (sql[0] == ';')
-											{
-												if (true == catalogExecute(CI))
-												{
-													temp = indexExecute(CI);
-													cout << temp << endl;
-												}
-											}
-											else
-											{
-												cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-												return -1;
-											}
-										}
-										else
-										{
-											temp = sql.substr(0, pos_space);
-											sql.erase(0, pos_space + 1);
-											removeSpace(sql);
-											CI.index_column_name = temp;
+        if (pos_space < 0)
+        {
+            temp = sql.substr(0, pos);
+            sql.erase(0, pos + 1);
+            CI.table_name = temp;
+            pos = sql.find(')');
+            if (pos < 0)
+            {
+                cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                return -1;
+            }
 
-											if (sql[0] == ')')
-											{
-												sql.erase(0, 1);
-												removeSpace(sql);
-												if (sql[0] == ';')
-												{
-													if (true == catalogExecute(CI))
-													{
-														temp = indexExecute(CI);
-														cout << temp << endl;
-													}
-												}
-												else
-												{
-													cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-													return -1;
-												}
-											}
-											else
-											{
-												cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-												return -1;
-											}
-										}
-									}
-								}
-							}
-							else
-							{
-								cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-								return -1;
-							}
+            temp = sql.substr(0, pos);
+            sql.erase(0, pos + 1);
+            CI.index_column_name = temp;
+            if (sql[0] == ';')
+            {
+                if (catalogExecute(CI))
+                {
+                    temp = indexExecute(CI);
+                    cout << temp << endl;
+                }
+            }
+            else
+            {
+                cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                return -1;
+            }
+        }
+        else
+        {
+            if (pos_space < pos)
+            {
+                temp = sql.substr(0, pos_space);
+                sql.erase(0, pos_space + 1);
+                removeSpace(sql);
+                CI.table_name = temp;
 
-						}
-						else
-						{
-							temp = sql.substr(0, pos);
-							sql.erase(0, pos + 1);
-							removeSpace(sql);
-							CI.table_name = temp;
+                if (sql[0] == '(')
+                {
+                    sql.erase(0, 1);
+                    pos_space = sql.find(' ');
+                    pos = sql.find(')');
 
-							pos_space = sql.find(' ');
-							pos = sql.find(')');
-							if (pos < 0)
-							{
-								cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-								return -1;
-							}
-							else
-							{
-								if (pos_space < 0)
-								{
-									temp = sql.substr(0, pos);
-									sql.erase(0, pos + 1);
-									CI.index_column_name = temp;
+                    if (pos < 0)
+                    {
+                        cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                        return -1;
+                    }
 
-									if (sql[0] == ';')
-									{
-										if (true == catalogExecute(CI))
-										{
-											temp = indexExecute(CI);
-											cout << temp << endl;
-										}
-									}
-									else
-									{
-										cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-										return -1;
-									}
-								}
-								else
-								{
-									if (pos_space > pos)
-									{
-										temp = sql.substr(0, pos);
-										sql.erase(0, pos + 1);
-										removeSpace(sql);
-										CI.index_column_name = temp;
+                    if (pos_space < 0)
+                    {
+                        temp = sql.substr(0, pos);
+                        sql.erase(0, pos + 1);
+                        CI.index_column_name = temp;
+                        if (sql[0] == ';')
+                        {
+                            if (true == catalogExecute(CI))
+                            {
+                                temp = indexExecute(CI);
+                                cout << temp << endl;
+                            }
+                        }
+                        else
+                        {
+                            cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        if (pos_space > pos)
+                        {
+                            temp = sql.substr(0, pos);
+                            sql.erase(0, pos + 1);
+                            removeSpace(sql);
+                            CI.index_column_name = temp;
 
-										if (sql[0] == ';')
-										{
-											if (true == catalogExecute(CI))
-											{
-												temp = indexExecute(CI);
-												cout << temp << endl;
-											}
-										}
-										else
-										{
-											cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-											return -1;
-										}
-									}
-									else
-									{
-										temp = sql.substr(0, pos_space);
-										sql.erase(0, pos_space + 1);
-										removeSpace(sql);
-										CI.index_column_name = temp;
-										if (sql[0] == ')')
-										{
-											sql.erase(0, 1);
-											removeSpace(sql);
-											if (sql[0] == ';')
-											{
-												if (true == catalogExecute(CI))
-												{
-													temp = indexExecute(CI);
-													cout << temp << endl;
-												}
+                            if (sql[0] == ';')
+                            {
+                                if (true == catalogExecute(CI))
+                                {
+                                    temp = indexExecute(CI);
+                                    cout << temp << endl;
+                                }
+                            }
+                            else
+                            {
+                                cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                                return -1;
+                            }
+                        }
+                        else
+                        {
+                            temp = sql.substr(0, pos_space);
+                            sql.erase(0, pos_space + 1);
+                            removeSpace(sql);
+                            CI.index_column_name = temp;
 
-											}
-											else
-											{
-												cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-												return -1;
-											}
-										}
-										else
-										{
-											cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-											return -1;
-										}
-									}
-								}
-							}
+                            if (sql[0] == ')')
+                            {
+                                sql.erase(0, 1);
+                                removeSpace(sql);
+                                if (sql[0] == ';')
+                                {
+                                    if (true == catalogExecute(CI))
+                                    {
+                                        temp = indexExecute(CI);
+                                        cout << temp << endl;
+                                    }
+                                }
+                                else
+                                {
+                                    cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                                    return -1;
+                                }
+                            }
+                            else
+                            {
+                                cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                                return -1;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                    return -1;
+                }
 
-						}
-					}
-				}
-			}
-			else
-			{
-				cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-		}
-	}
+            }
+            else
+            {
+                temp = sql.substr(0, pos);
+                sql.erase(0, pos + 1);
+                removeSpace(sql);
+                CI.table_name = temp;
 
+                pos_space = sql.find(' ');
+                pos = sql.find(')');
+                if (pos < 0)
+                {
+                    cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                    return -1;
+                }
+
+                if (pos_space < 0)
+                {
+                    temp = sql.substr(0, pos);
+                    sql.erase(0, pos + 1);
+                    CI.index_column_name = temp;
+
+                    if (sql[0] == ';')
+                    {
+                        if (catalogExecute(CI))
+                        {
+                            temp = indexExecute(CI);
+                            cout << temp << endl;
+                        }
+                    }
+                    else
+                    {
+                        cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                        return -1;
+                    }
+                }
+                else
+                {
+                    if (pos_space > pos)
+                    {
+                        temp = sql.substr(0, pos);
+                        sql.erase(0, pos + 1);
+                        removeSpace(sql);
+                        CI.index_column_name = temp;
+
+                        if (sql[0] == ';')
+                        {
+                            if (catalogExecute(CI))
+                            {
+                                temp = indexExecute(CI);
+                                cout << temp << endl;
+                            }
+                        }
+                        else
+                        {
+                            cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                            return -1;
+                        }
+                    }
+                    else
+                    {
+                        temp = sql.substr(0, pos_space);
+                        sql.erase(0, pos_space + 1);
+                        removeSpace(sql);
+                        CI.index_column_name = temp;
+                        if (sql[0] == ')')
+                        {
+                            sql.erase(0, 1);
+                            removeSpace(sql);
+                            if (sql[0] == ';')
+                            {
+                                if (catalogExecute(CI))
+                                {
+                                    temp = indexExecute(CI);
+                                    cout << temp << endl;
+                                }
+
+                            }
+                            else
+                            {
+                                cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                                return -1;
+                            }
+                        }
+                        else
+                        {
+                            cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+                            return -1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+        return -1;
+    }
+    return 0;
 }
 
 //对create table语句的翻译模块
 int createTableConvert(string &sql)
 {
-	int opt = 1;
-	int pos_space, pos, pos_end;
+	int opt; // int opt = 1;
+	// int pos_end; // never used
 	string temp;
 	CreateTable CT;
 
 	CT.column_num = 0;
-	pos_space = sql.find(' ');
-	pos = sql.find('(');
+    const int pos_space = sql.find(' ');
+	int pos = sql.find('(');
 	if (pos < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -585,10 +562,9 @@ int createTableConditionConvert(string &sql, CreateTable &CT)
 {
 	int opt = 1;
 	int length;
-	int pos_space, pos_end, pos_left, pos_right;
-	string temp;
+	int pos_left, pos_right;
 
-	pos_space = sql.find(' ');
+    int pos_space = sql.find(' ');
 
 	if (pos_space < 0)
 	{
@@ -597,12 +573,12 @@ int createTableConditionConvert(string &sql, CreateTable &CT)
 	}
 	else
 	{
-		temp = sql.substr(0, pos_space);
+		string temp = sql.substr(0, pos_space);
 		sql.erase(0, pos_space + 1);
 		removeSpace(sql);
 		CT.column_name[CT.column_num] = temp;
 		pos_space = sql.find(' ');
-		pos_end = sql.find(',');
+		int pos_end = sql.find(',');
 		if (pos_space < 0)
 		{
 			temp = sql.substr(0, pos_end);
@@ -770,10 +746,9 @@ int createTableConditionConvert(string &sql, CreateTable &CT)
 int createTablePrimaryConvert(string &sql, CreateTable &CT)
 {
 	int opt = 1;
-	int pos_space, pos;
-	string temp;
+	int pos;
 
-	pos_space = sql.find(' ');
+    int pos_space = sql.find(' ');
 	if (pos_space < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -781,7 +756,7 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 	}
 	else
 	{
-		temp = sql.substr(0, pos_space);
+		string temp = sql.substr(0, pos_space);
 		removeSpace(sql);
 		if (temp == lag_primary)
 		{
@@ -855,12 +830,11 @@ int createTablePrimaryConvert(string &sql, CreateTable &CT)
 int deleteConvert(string &sql)
 {
 	int opt = 40;
-	int pos_space, pos_end, pos;
-	string temp;
-	Delete D;
+	int pos;
+    Delete D;
 
 	D.condition_num = 0;
-	pos_space = sql.find(' ');
+	int pos_space = sql.find(' ');
 	if (pos_space < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -868,14 +842,14 @@ int deleteConvert(string &sql)
 	}
 	else
 	{
-		temp = sql.substr(0, pos_space);
+		string temp = sql.substr(0, pos_space);
 		sql.erase(0, pos_space + 1);
 		removeSpace(sql);
 
 		if (temp == lag_from)
 		{
 			pos_space = sql.find(' ');
-			pos_end = sql.find(';');
+			int pos_end = sql.find(';');
 			if (pos_space < 0)
 			{
 				if (sql[0] == ';')
@@ -951,12 +925,11 @@ int deleteConvert(string &sql)
 int deleteConditionConvert(string &sql, Delete &D)
 {
 	int opt = 40;
-	int pos_space, pos_end, pos;
-	string temp;
+	int pos;
 
-	while (true)
+    while (true)
 	{
-		pos_space = sql.find(' ');
+		int pos_space = sql.find(' ');
 		if (pos_space < 0)
 		{
 			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -964,7 +937,7 @@ int deleteConditionConvert(string &sql, Delete &D)
 		}
 		else
 		{
-			temp = sql.substr(0, pos_space);
+			string temp = sql.substr(0, pos_space);
 			sql.erase(0, pos_space + 1);
 			removeSpace(sql);
 			D.condition_name.push_back(temp);
@@ -983,7 +956,7 @@ int deleteConditionConvert(string &sql, Delete &D)
 				{
 					D.condition_op.push_back(temp);
 					pos_space = sql.find(' ');
-					pos_end = sql.find(';');
+					int pos_end = sql.find(';');
 					if (pos_space < 0)
 					{
 						temp = sql.substr(0, pos_end);
@@ -1112,11 +1085,10 @@ int deleteConditionConvert(string &sql, Delete &D)
 int dropConvert(string &sql)
 {
 	int opt = 1;
-	int pos_space, pos_end, pos;
-	string temp;
+	int pos;
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
+    int pos_space = sql.find(' ');
+	int pos_end = sql.find(';');
 	if (pos_space < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -1124,7 +1096,7 @@ int dropConvert(string &sql)
 	}
 	else
 	{
-		temp = sql.substr(0, pos_space);
+		string temp = sql.substr(0, pos_space);
 		sql.erase(0, pos_space + 1);
 		removeSpace(sql);
 		if (temp == lag_table)
@@ -1149,12 +1121,12 @@ int dropConvert(string &sql)
 int dropTableConvert(string &sql)
 {
 	int opt = 2;
-	int pos_space, pos_end, pos;
+	int pos;
 	string temp;
 	DropTable DT;
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
+	int pos_space = sql.find(' ');
+	int pos_end = sql.find(';');
 	if (pos_space < 0)
 	{
 		temp = sql.substr(0, pos_end);
@@ -1195,12 +1167,12 @@ int dropTableConvert(string &sql)
 int dropIndexConvert(string &sql)
 {
 	int opt = 11;
-	int pos_space, pos_end, pos;
+	int pos;
 	string temp;
 	DropIndex DI;
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
+	int pos_space = sql.find(' ');
+	int pos_end = sql.find(';');
 	if (pos_space < 0)
 	{
 		temp = sql.substr(0, pos_end);
@@ -1234,10 +1206,9 @@ int dropIndexConvert(string &sql)
 int insertConvert(string &sql)
 {
 	int opt = 30;
-	int pos_space, pos_end, pos;
-	string temp;
+	int pos_end;
 
-	pos_space = sql.find(' ');
+    int pos_space = sql.find(' ');
 	if (pos_space < 0)
 	{
 		cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -1245,7 +1216,7 @@ int insertConvert(string &sql)
 	}
 	else
 	{
-		temp = sql.substr(0, pos_space);
+		string temp = sql.substr(0, pos_space);
 		sql.erase(0, pos_space + 1);
 		removeSpace(sql);
 		if (temp == lag_into)
@@ -1264,7 +1235,7 @@ int insertConvert(string &sql)
 				Insert I;
 				I.table_name = temp;
 				I.value_num = 0;
-				pos = sql.find('(');
+				int pos = sql.find('(');
 				if (pos < 0)
 				{
 					cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -1324,13 +1295,12 @@ int insertConvert(string &sql)
 int insertConditionConvert(string &sql, Insert &I)
 {
 	int opt = 30;
-	int pos, pos_right;
-	string temp;
+	int pos_right;
 
-	pos = sql.find(',');
+    int pos = sql.find(',');
 	while (pos > 0)
 	{
-		temp = sql.substr(0, pos);
+		string temp = sql.substr(0, pos);
 		sql.erase(0, pos + 1);
 		if (temp[0] == '\'')
 		{
@@ -1374,9 +1344,8 @@ int insertConditionConvert(string &sql, Insert &I)
 int selectConvert(string &sql)
 {
 	int opt = 20;
-	int pos_space, pos_end, pos;
-	string temp;
-	Select S;
+	int pos;
+    Select S;
 
 	S.condition_num = 0;
 	removeSpace(sql);
@@ -1384,7 +1353,7 @@ int selectConvert(string &sql)
 	{
 		sql.erase(0, 1);
 		removeSpace(sql);
-		pos_space = sql.find(' ');
+		int pos_space = sql.find(' ');
 		if (pos_space < 0)
 		{
 			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -1392,13 +1361,13 @@ int selectConvert(string &sql)
 		}
 		else
 		{
-			temp = sql.substr(0, pos_space);
+			string temp = sql.substr(0, pos_space);
 			sql.erase(0, pos_space + 1);
 			removeSpace(sql);
 			if (temp == lag_from)
 			{
 				pos_space = sql.find(' ');
-				pos_end = sql.find(';');
+				int pos_end = sql.find(';');
 				if (pos_space < 0)
 				{
 					temp = sql.substr(0, pos_end);
@@ -1483,12 +1452,11 @@ int selectConvert(string &sql)
 int selectConditionConvert(string &sql, Select &S)
 {
 	int opt = 20;
-	int pos_space, pos_end, pos;
-	string temp;
+	int pos;
 
-	while (true)
+    while (true)
 	{
-		pos_space = sql.find(' ');
+		int pos_space = sql.find(' ');
 		if (pos_space < 0)
 		{
 			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
@@ -1496,7 +1464,7 @@ int selectConditionConvert(string &sql, Select &S)
 		}
 		else
 		{
-			temp = sql.substr(0, pos_space);
+			string temp = sql.substr(0, pos_space);
 			sql.erase(0, pos_space + 1);
 			removeSpace(sql);
 			S.condition_name.push_back(temp);
@@ -1515,7 +1483,7 @@ int selectConditionConvert(string &sql, Select &S)
 				{
 					S.condition_op.push_back(temp);
 					pos_space = sql.find(' ');
-					pos_end = sql.find(';');
+					int pos_end = sql.find(';');
 					if (pos_space < 0)
 					{
 						temp = sql.substr(0, pos_end);
@@ -1642,12 +1610,11 @@ int selectConditionConvert(string &sql, Select &S)
 int execfileConvert(string &sql)
 {
 	int opt = 50;
-	int pos_space, pos_end;
-	string temp;
+    string temp;
 	string file_pos("../test_file/");
 
-	pos_space = sql.find(' ');
-	pos_end = sql.find(';');
+	int pos_space = sql.find(' ');
+	int pos_end = sql.find(';');
 	if (pos_space >= 0)
 	{
 		temp = sql.substr(0, pos_space);
@@ -1709,8 +1676,7 @@ void getFileConvert(string &file_pos)
 //判断执行界面一条sql语句是否输入结束
 bool isSqlEnd(string &temp)
 {
-	int pos;
-	pos = temp.find(';', 0);
+    int pos = temp.find(';', 0);
 	if (0 <= pos)
 		return true;
 	else
@@ -1730,9 +1696,7 @@ void removeSpace(string &temp)
 //删去string中的所有space
 void removeSpaceAll(string &temp)
 {
-	int pos;
-
-	pos = temp.find(' ');
+    int pos = temp.find(' ');
 	while (pos > 0)
 	{
 		temp.erase(pos, 1);

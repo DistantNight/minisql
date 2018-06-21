@@ -53,8 +53,8 @@ bool getTableInfo(Table & d)
                 }
                 else
                 {
-                    const int f = s.nameOfType[i].find_first_of("(");
-                    const int e = s.nameOfType[i].find_first_of(")");
+                    const auto f = s.nameOfType[i].find_first_of("(");
+                    const auto e = s.nameOfType[i].find_first_of(")");
                     string fen = s.nameOfType[i].substr(f + 1, e - 1);
 
                     d.string_length[i] = atoi(fen.c_str());
@@ -184,8 +184,8 @@ string catalogExecute(DropTable & c)
                 }
                 else
                 {
-                    const int f = (*s).nameOfType[i].find_first_of("(");
-                    const int e = (*s).nameOfType[i].find_first_of(")");
+                    const auto f = (*s).nameOfType[i].find_first_of("(");
+                    const auto e = (*s).nameOfType[i].find_first_of(")");
                     string fen = (*s).nameOfType[i].substr(f + 1, e - 1);
                     int a = atoi(fen.c_str());
                     c.string_length[i] = a;
@@ -271,11 +271,10 @@ bool catalogExecute(CreateIndex &d)
                 }
                 else
                 {
-                    int f = s.nameOfType[i].find_first_of("(");
-                    int e = s.nameOfType[i].find_first_of(")");
+                    const auto f = s.nameOfType[i].find_first_of("(");
+                    const auto e = s.nameOfType[i].find_first_of(")");
                     string fen = s.nameOfType[i].substr(f + 1, e - 1);
-                    int a = atoi(fen.c_str());
-                    d.string_length[i] = a;
+                    d.string_length[i] = atoi(fen.c_str());
                 }
             }
             for (int i = 0; i < s.numberOfKey; i++)
