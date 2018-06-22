@@ -481,9 +481,10 @@ int createTableConvert(string &sql)
 	CreateTable CT;
 
 	CT.column_num = 0;
+	removeSpace(sql);
     const int pos_space = sql.find(' ');
 	int pos = sql.find('(');
-	if (pos < 0)
+	if (pos < 0 || sql[0] == '(')
 	{
 		cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
 		return -1;
