@@ -38,7 +38,7 @@ public:
     void setCurrentPageIndex(int i);
 
     std::vector<std::string> getTuple(const int tuple_i) const;
-    bool tupleDeleted(int tuple_i) const;
+    bool tupleHasBeenDeleted(int tuple_i) const;
     void lazyDeleteTuple(int tuple_i) const;
 
     void tellBufferPageHasChanged() const;

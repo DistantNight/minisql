@@ -12,7 +12,7 @@ string catalogExecute(CreateTable &);
 //bool indexExecute(CreateTable &);
 
 // 执行drop table，最后catalog management返回格式化结果输出字符串
-string catalogExecute(DropTable &);
+string catalogExecute(const DropTable&);
 bool recordExecute(DropTable &);
 bool indexExecute(DropTable &);
 

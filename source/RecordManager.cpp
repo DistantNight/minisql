@@ -1,5 +1,5 @@
-/* 
- * Ray Yan 
+/*
+ * Ray Yan
  * 2018/6/15
  */
 
@@ -16,7 +16,7 @@
 
 #define USE_INDEX
 
-extern Buffer* database;
+extern Buffer* database;  // NOLINT(readability-redundant-declaration)
 using namespace std;
 const int page_size = BLOCK_LEN;
 
@@ -26,16 +26,16 @@ const int page_size = BLOCK_LEN;
  *     0 - 159 table name, type : char[160]
  *     160 - 163 tuple size, type : int
  *      (for example a table with attribute char(5), char(10), int, float should have size of 5 + 10 + 4 + 4 = 23)
- *     164 page indicator, type : int8_t. '0' means an empty memory page, '1' means the first page of the record, 
+ *     164 page indicator, type : int8_t. '0' means an empty memory page, '1' means the first page of the record,
  *      '2' means the second page of the record and so on.
  *     165 column number, type: int8_t
  *     166 - 169 end of tuple offset
  *     176 - 187  size of each tuple, type: int8_t
- *     
+ *
  *     188 - 191 offset to next available space to hold the tuple(free list), type : int
  */
 
-// a function help to determine if the condition is satisfied
+ // a function help to determine if the condition is satisfied
 template <typename T>
 bool checkCondition(const T &v1, const T &v2, const string& condition_op)
 {
@@ -66,7 +66,7 @@ bool checkCondition(const T &v1, const T &v2, const string& condition_op)
     return false;
 }
 
-RecordManager::RecordManager(const Table & table): table_(table)
+RecordManager::RecordManager(const Table & table) : table_(table)
 {
     int size = 0;
     for (int i = 0; i < table.column_num; ++i)
@@ -77,11 +77,9 @@ RecordManager::RecordManager(const Table & table): table_(table)
             size += 4;
             break;
         case FLOAT:
-
             size += 4;
             break;
         case CHAR:
-            
             size += table.string_length[i];
             break;
         }
@@ -94,7 +92,7 @@ RecordManager::RecordManager(const Table & table): table_(table)
 }
 
 bool RecordManager::isEmptyPage() const
-{    
+{
     return memory_page_[164] == 0;
 }
 
@@ -104,7 +102,6 @@ void RecordManager::addMetadataToPage() const
     int8_t * offset_current = memory_page_; // a pointer point to current location;
     pack(table_.table_name, offset_current);
     offset_current += 160;
-
 
     memory_page_[165] = table_.column_num;
 
@@ -217,12 +214,10 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         return std::vector<std::string>();
     }
     std::vector<std::string> result(table_.column_num);
-    auto reading_position = begin() + tuple_i * tuple_size;
+    const auto start_position = begin() + tuple_i * tuple_size;
 
     for (int i = 0; i < table_.column_num; ++i) // put values in to the table
     {
-        // string value_on_screen;
-
         // same routine to get value
         int offset = 1; // the first byte is the valid bit; 
         for (int j = 0; j < i; ++j) // start reading offset from [176] in header of the memory page
@@ -236,15 +231,15 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
         switch (table_.column_type[i])
         {
         case INT:
-            value_int = unpackInt(&reading_position[offset]);
+            value_int = unpackInt(&start_position[offset]);
             result.at(i) = std::to_string(value_int);
             break;
         case FLOAT:
-            value_float = unpackFloat(&reading_position[offset]);
+            value_float = unpackFloat(&start_position[offset]);
             result.at(i) = std::to_string(value_float);
             break;
         case CHAR:
-            str = unpackString(&reading_position[offset], table_.string_length[i]);
+            str = unpackString(&start_position[offset], table_.string_length[i]);
             result.at(i) = str;
             break;
         }
@@ -252,13 +247,13 @@ std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
     return result;
 }
 
-bool RecordManager::tupleDeleted(int tuple_i) const
+bool RecordManager::tupleHasBeenDeleted(const int tuple_i) const
 {
     const auto reading_position = begin() + tuple_i * tuple_size;
     return reading_position[0] == 0;
 }
 
-void RecordManager::lazyDeleteTuple(int tuple_i) const
+void RecordManager::lazyDeleteTuple(const int tuple_i) const
 {
     const auto reading_position = begin() + tuple_i * tuple_size;
     reading_position[0] = 0;
@@ -274,12 +269,12 @@ bool RecordManager::passUniqueConstraintTest(const Insert& table, const RecordMa
 {
     for (int i = 0; i < (r.getEndofTupleOffset() - 192) / r.tuple_size; ++i)
     {
-        if (r.tupleDeleted(i))
+        if (r.tupleHasBeenDeleted(i))
         {
             continue;
         }
         auto result = r.getTuple(i);
-        for (int j = 0 ; j < table.column_num; ++j)
+        for (int j = 0; j < table.column_num; ++j)
         {
             if (table.is_unique[j] && result.at(j) == table.row_value[j]) // should be unique, but insert same string
             {
@@ -297,6 +292,7 @@ string recordExecute(Insert &table)
         throw length_error("value number is not equal to column munber!");
     }
     RecordManager r(table);
+    // ReSharper disable once CppInitializedValueIsAlwaysRewritten
     bool still_need_check_unique_constraint = true;
 
 #ifdef USE_INDEX
@@ -340,7 +336,7 @@ string recordExecute(Insert &table)
         }
     }
 #endif
-   
+
     while (true)
     {
         r.toNextPage();
@@ -404,26 +400,17 @@ string recordExecute(Insert &table)
                     }
                 }
                 const int new_end_of_tuple_offset = r.getEndofTupleOffset() + r.tuple_size;
-                //if (new_end_of_tuple_offset + memory_page_ != insert_position + 4) // 4 bytes are the reserve space
-                //{
-                //    throw logic_error("size of tuple doesn't match");
-                //}
-                /*pack(new_end_of_tuple_offset, memory_page_ + 166);*/ // update end()
                 r.setEndofTupleOffset(new_end_of_tuple_offset);
                 r.tellBufferPageHasChanged();
 
                 return std::string("Query OK, 1 row affected");
-            }
-            else
-            {
-                continue;
             }
         }
         else
         {
             return std::string("ERROR 1551: Cannot insert a row: a unique key constraint fails");
         }
-    } 
+    }
 }
 
 string recordExecute(Select &table)
@@ -543,7 +530,7 @@ string recordExecute(Select &table)
         while (reading_positon < r.end()) // !eof
         {
             bool meet_conditions = true;
-            if (r.tupleDeleted(tuple_i)) // deleted
+            if (r.tupleHasBeenDeleted(tuple_i)) // deleted
             {
                 reading_positon += r.tuple_size;
                 ++tuple_i;
@@ -555,7 +542,6 @@ string recordExecute(Select &table)
                 const auto col_name = table.condition_name.at(i);
                 const auto col_index = r.column_name_to_index[col_name];
                 //int offset = 1; // the first byte is the valid bit; 
-                
 
                 int value_int, condition_int;
                 float value_float, condition_float;
@@ -610,7 +596,7 @@ string recordExecute(Select &table)
         }
         r.toNextPage();
     } while (true);
-    
+
     // drawing header
     ostringstream table_border;
     table_border << '+';
@@ -641,7 +627,7 @@ string recordExecute(Select &table)
         }
         query_result << '\n';
     }
-    query_result << table_border.str() << "\n" << result_tuple_num - 1 << "row(s) in set";
+    query_result << table_border.str() << "\n" << result_tuple_num - 1 << " row(s) in set";
     return query_result.str();
 }
 
@@ -649,7 +635,7 @@ string recordExecute(Delete &table) // delete
 {
     RecordManager r(table);
 
-    int result_tuple_num = 0; 
+    int result_tuple_num = 0;
 
     r.toNextPage();
     if (r.isEmptyPage())
@@ -658,17 +644,18 @@ string recordExecute(Delete &table) // delete
     }
 
 #ifdef USE_INDEX
+    IndexManager index_manager(table);
     // Use index only when:
     // (1) there is only one condition,
     // (2) and it is an equality querying
-    // (3) on the column that has an index    
+    // (3) on the column that has an index   
     if (table.condition_num == 1 && table.condition_op.at(0) == "=")
     {
         const auto i = r.column_name_to_index[table.condition_name.at(0)];
         const auto index_name = table.all_index_name[i];
         if (!index_name.empty()) // the column that has an index 
         {
-            IndexManager index_manager(table);
+
             std::istringstream record(table.condition_value[0]);
             int page_num = 0;
             switch (table.column_type[i])
@@ -695,10 +682,10 @@ string recordExecute(Delete &table) // delete
                 return "Query OK, 0 row affected";
             }
             r.setCurrentPageIndex(page_num);
-            
-            for (int j = 0; j < r.getEndofTupleOffset() / r.tuple_size; ++j)
+
+            for (int j = 0; j < r.getEndofTupleOffset() - 192 / r.tuple_size; ++j)
             {
-                if (r.tupleDeleted(i))
+                if (r.tupleHasBeenDeleted(i))
                 {
                     continue;
                 }
@@ -726,7 +713,7 @@ string recordExecute(Delete &table) // delete
         {
             bool meet_conditions = true;
             // auto read_here = reading_positon;
-            if (r.tupleDeleted(tuple_i)) // deleted
+            if (r.tupleHasBeenDeleted(tuple_i)) // deleted
             {
                 reading_positon += r.tuple_size;
                 ++tuple_i;
@@ -767,9 +754,36 @@ string recordExecute(Delete &table) // delete
 
             if (meet_conditions) // this tuple will deleted
             {
-               // delete the tuple
+                // delete the tuple
                 r.lazyDeleteTuple(tuple_i);
                 ++result_tuple_num;
+#ifdef USE_INDEX
+                // delete related index
+                auto deleted_tuple = r.getTuple(tuple_i);
+                for (int i = 0; i < table.column_num; ++i)
+                {
+                    if (!table.all_index_name[i].empty()) // index here
+                    {
+                        std::istringstream record(deleted_tuple.at(i));
+                        switch (table.column_type[i])
+                        {
+                        case INT:
+                            int int_value;
+                            record >> int_value;
+                            index_manager.deleteIndexByKey(table.all_index_name[i], int_value, INT);
+                            break;
+                        case FLOAT:
+                            float float_value;
+                            record >> float_value;
+                            index_manager.deleteIndexByKey(table.all_index_name[i], float_value, FLOAT);
+                            break;
+                        case CHAR:
+                            index_manager.deleteIndexByKey(table.all_index_name[i], deleted_tuple[i], CHAR);
+                            break;
+                        }
+                    }
+                }
+#endif
             }
             reading_positon += r.tuple_size;
             ++tuple_i;
@@ -783,7 +797,7 @@ string recordExecute(Delete &table) // delete
     } while (true);
 
     ostringstream deleting_result;
-    deleting_result << "Query OK, " << result_tuple_num << "row(s) affected";
+    deleting_result << "Query OK, " << result_tuple_num << " row(s) affected";
 
     return deleting_result.str();
 }
@@ -819,9 +833,12 @@ string indexExecute(CreateIndex& table)
         {
             last_page = true;
         }
-        for (int j = 0; j < r.getEndofTupleOffset() / r.tuple_size; ++j)
+        for (int j = 0; j < (r.getEndofTupleOffset() - 192) / r.tuple_size; ++j)
         {
-
+            if (r.tupleHasBeenDeleted(j))
+            {
+                continue;
+            }
             std::istringstream record(r.getTuple(j).at(i));
             switch (table.column_type[i])
             {
@@ -839,7 +856,7 @@ string indexExecute(CreateIndex& table)
                 index_manager.insertIndex(table.all_index_name[i], r.getTuple(j).at(i), CHAR, r.getCurrentPageIndex());
                 break;
             }
-        }       
+        }
     }
 
 #endif

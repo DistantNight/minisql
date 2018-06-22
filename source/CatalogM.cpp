@@ -142,7 +142,7 @@ string catalogExecute(CreateTable & b)
     return "Create table " + b.table_name + " successfully";
 }
 
-string catalogExecute(DropTable & c)
+string catalogExecute(const DropTable& c)
 {
     catalogManager& x = *catalog_manager;
     const int judge = x.isTableExist(c.table_name);
@@ -150,79 +150,78 @@ string catalogExecute(DropTable & c)
     {
         return "ERROR: table doesnt exist";
     }
-    for (auto s = x.myt.begin(); s != x.myt.end(); ++s)
-    {
-        if ((*s).nameOfTable == c.table_name)
-        {
-            c.column_num = (*s).numberOfKey;
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
-                c.column_name[i] = (*s).nameOfKey[i];
-            }
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
-                string str = (*s).nameOfType[i];
-                const char * ee = str.c_str();
-                if ((*s).nameOfType[i] == "int")
-                {
-                    c.column_type[i] = INT;
-                }
-                else if (strcspn(ee, "char") == 0)
-                {
-                    c.column_type[i] = CHAR;
-                }
-                else if ((*s).nameOfType[i] == "float")
-                {
-                    c.column_type[i] = FLOAT;
-                }
-            }
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
-                if ((*s).nameOfType[i] == "int" || (*s).nameOfType[i] == "float")
-                {
-                    c.string_length[i] = 0;
-                }
-                else
-                {
-                    const auto f = (*s).nameOfType[i].find_first_of("(");
-                    const auto e = (*s).nameOfType[i].find_first_of(")");
-                    string fen = (*s).nameOfType[i].substr(f + 1, e - 1);
-                    int a = atoi(fen.c_str());
-                    c.string_length[i] = a;
-                }
-            }
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
-                c.is_unique[i] = static_cast<bool>((*s).isUnique[i]);
-            }
-            c.primary_key = (*s).primaryKey;
-            int numc = 0;
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
+    //for (auto s = x.myt.begin(); s != x.myt.end(); ++s)
+    //{
+    //    if ((*s).nameOfTable == c.table_name)
+    //    {
+    //        c.column_num = (*s).numberOfKey;
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
+    //            c.column_name[i] = (*s).nameOfKey[i];
+    //        }
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
+    //            string str = (*s).nameOfType[i];
+    //            const char * ee = str.c_str();
+    //            if ((*s).nameOfType[i] == "int")
+    //            {
+    //                c.column_type[i] = INT;
+    //            }
+    //            else if (strcspn(ee, "char") == 0)
+    //            {
+    //                c.column_type[i] = CHAR;
+    //            }
+    //            else if ((*s).nameOfType[i] == "float")
+    //            {
+    //                c.column_type[i] = FLOAT;
+    //            }
+    //        }
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
+    //            if ((*s).nameOfType[i] == "int" || (*s).nameOfType[i] == "float")
+    //            {
+    //                c.string_length[i] = 0;
+    //            }
+    //            else
+    //            {
+    //                const auto f = (*s).nameOfType[i].find_first_of("(");
+    //                const auto e = (*s).nameOfType[i].find_first_of(")");
+    //                string fen = (*s).nameOfType[i].substr(f + 1, e - 1);
+    //                int a = atoi(fen.c_str());
+    //                c.string_length[i] = a;
+    //            }
+    //        }
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
+    //            c.is_unique[i] = static_cast<bool>((*s).isUnique[i]);
+    //        }
+    //        c.primary_key = (*s).primaryKey;
+    //        int numc = 0;
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
 
-                if ((*s).nameOfIndex[i] != "*") numc++;
-            }
-            c.exist_index_num = numc;
-            for (int i = 0; i < (*s).numberOfKey; i++)
-            {
-                if ((*s).nameOfIndex[i] == "*")
-                {
-                    c.all_index_name[i] = "";
-                }
-                else
-                {
-                    c.all_index_name[i] = (*s).nameOfIndex[i];//* -> not exist
-                }
+    //            if ((*s).nameOfIndex[i] != "*") numc++;
+    //        }
+    //        c.exist_index_num = numc;
+    //        for (int i = 0; i < (*s).numberOfKey; i++)
+    //        {
+    //            if ((*s).nameOfIndex[i] == "*")
+    //            {
+    //                c.all_index_name[i] = "";
+    //            }
+    //            else
+    //            {
+    //                c.all_index_name[i] = (*s).nameOfIndex[i];//* -> not exist
+    //            }
 
-            }
+    //        }
 
+    //    }        
+    //}
 
-        }
-        x.dropTable(c.table_name);
+    x.dropTable(c.table_name);
+    return "Drop table " + c.table_name + " successfully";
 
-        return "drop success";
-    }
-    return "ERROR: table doesnt exist";
 }
 
 bool catalogExecute(CreateIndex &d)
@@ -232,8 +231,7 @@ bool catalogExecute(CreateIndex &d)
     int judge = x.isIndexExist(d.index_name, d.table_name);
     if (judge == 1)
     {
-
-        cout << "index exist" << endl;
+        cout << "ERROR: index "<< d.index_name <<" on table " << d.table_name << " is already exist" << endl;
         return false;
     }
     x.createIndex(d.index_name, d.table_name, d.index_column_name);
@@ -300,13 +298,8 @@ bool catalogExecute(CreateIndex &d)
                     d.all_index_name[i] = s.nameOfIndex[i];//* -> not exist
                 }
             }
-
-
         }
-
-
     }
-    cout << "create index successfully" << endl;
     return true;
 }
 
@@ -316,7 +309,7 @@ bool catalogExecute(DropIndex &d)
 {
     catalogManager& x = *catalog_manager;
     int judge = x.isIndexExist(d.index_name, d.table_name);
-    if (judge = 0)
+    if (judge == 0)
     {
         cout << "index not exist" << endl;
         return false;

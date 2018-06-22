@@ -906,7 +906,7 @@ void BPTree<T>::readFromDisk(const char* ph, char* end)
             const std::string sa(temp);
             std::stringstream streama(sa);
             streama >> key;
-			
+
             memset(temp, 0, sizeof(temp));
             i++;
 
@@ -935,9 +935,9 @@ inline void BPTree<std::string>::readFromDisk(const char* ph, char* end)
 
             for (j = 0; i < BLOCK_LEN && ph[i] != ','; i++) temp[j++] = ph[i];
             temp[j] = '\0';
-            
+
             std::string key = temp;
-                      
+
             memset(temp, 0, sizeof(temp));
             i++;
 
