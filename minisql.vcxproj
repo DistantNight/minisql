@@ -28,6 +28,7 @@
     <ClInclude Include="include\OperationInput.h" />
     <ClInclude Include="include\RecordManager.h" />
     <ClInclude Include="include\Serialize.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\API_index.cpp" />
@@ -42,6 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\buffer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="minisql.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="minisql.ico" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
