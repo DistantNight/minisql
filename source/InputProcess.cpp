@@ -1167,7 +1167,7 @@ int dropIndexConvert(string &sql)
         }
         else
         {
-            cout << "Index has been droped successfully" << endl;
+            //cout << "Index has been droped successfully" << endl;
         }
 	}
 	else
@@ -1188,7 +1188,7 @@ int dropIndexConvert(string &sql)
         }
         else
         {
-            cout << "Index has been droped successfully" << endl;
+            //cout << "Index has been droped successfully" << endl;
         }
 	}
 

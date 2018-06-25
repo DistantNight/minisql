@@ -303,11 +303,99 @@ bool catalogExecute(CreateIndex &d)
     return true;
 }
 
+//bool catalogExecute(DropIndex &d)
+//{
+//    catalogManager& x = *catalog_manager;
+//    for (auto& s : x.myt)
+//    {
+//        if (s.nameOfTable == d.table_name)
+//        {
+//            d.column_num = s.numberOfKey;
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//                d.column_name[i] = s.nameOfKey[i];
+//            }
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//                string str = s.nameOfType[i];
+//                const char * ee = str.c_str();
+//                if (s.nameOfType[i] == "int")
+//                {
+//                    d.column_type[i] = INT;
+//                }
+//                else if (strcspn(ee, "char") == 0)
+//                {
+//                    d.column_type[i] = CHAR;
+//                }
+//                else if (s.nameOfType[i] == "float")
+//                {
+//                    d.column_type[i] = FLOAT;
+//                }
+//            }
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//                if (s.nameOfType[i] == "int" || s.nameOfType[i] == "float")
+//                {
+//                    d.string_length[i] = 0;
+//                }
+//                else
+//                {
+//                    int f = s.nameOfType[i].find_first_of("(");
+//                    int e = s.nameOfType[i].find_first_of(")");
+//                    string fen = s.nameOfType[i].substr(f + 1, e - 1);
+//                    int a = atoi(fen.c_str());
+//                    d.string_length[i] = a;
+//                }
+//            }
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//                d.is_unique[i] = static_cast<bool>(s.isUnique[i]);
+//            }
+//            d.primary_key = s.primaryKey;
+//            int numc = 0;
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//
+//                if (s.nameOfIndex[i] != "*") numc++;
+//            }
+//            d.exist_index_num = numc;
+//            for (int i = 0; i < s.numberOfKey; i++)
+//            {
+//                if (s.nameOfIndex[i] == "*")
+//                {
+//                    d.all_index_name[i] = "";
+//                }
+//                else
+//                {
+//                    d.all_index_name[i] = s.nameOfIndex[i];//* -> not exist
+//                }
+//            }
+//        }
+//    }
+//    int judge = x.isIndexExist(d.index_name, d.table_name);
+//    if (judge != 1)
+//    {
+//        // cout << "ERROR 1002: index not exist" << endl;
+//        return false;
+//    }
+//    
+//    x.deleteIndex(d.index_name);
+//
+//    return true;
+//}
 
-
-bool catalogExecute(DropIndex &d)
-{
+bool catalogExecute(DropIndex &d){
     catalogManager& x = *catalog_manager;
+    
+    for (auto& g : x.myi)
+    {
+        if (g.nameOfIndex == d.index_name)
+        {
+            d.table_name = g.tableOfIndex;
+            break;
+        }
+    }
+
     for (auto& s : x.myt)
     {
         if (s.nameOfTable == d.table_name)
@@ -317,6 +405,7 @@ bool catalogExecute(DropIndex &d)
             {
                 d.column_name[i] = s.nameOfKey[i];
             }
+
             for (int i = 0; i < s.numberOfKey; i++)
             {
                 string str = s.nameOfType[i];
@@ -357,7 +446,6 @@ bool catalogExecute(DropIndex &d)
             int numc = 0;
             for (int i = 0; i < s.numberOfKey; i++)
             {
-
                 if (s.nameOfIndex[i] != "*") numc++;
             }
             d.exist_index_num = numc;
@@ -374,17 +462,7 @@ bool catalogExecute(DropIndex &d)
             }
         }
     }
-    int judge = x.isIndexExist(d.index_name, d.table_name);
-    if (judge != 1)
-    {
-        // cout << "ERROR 1002: index not exist" << endl;
-        return false;
-    }
-    
-    x.deleteIndex(d.index_name);
-
-    return true;
-}
+    const int judge = x.isIndexExist(d.index_name, d.table_name);    if (judge != 1)    {        cout << "ERROR 1002: index not exist" << endl;        return false;    }    x.deleteIndex(d.index_name);    return true;}
 
 bool catalogExecute(Insert &d)
 {
@@ -473,6 +551,7 @@ bool catalogExecute(Insert &d)
     }
     return x.numberOfRecordAdd(d.table_name, 1);
 }
+
 bool catalogExecute(Delete &d)
 {
     catalogManager& x = *catalog_manager;
