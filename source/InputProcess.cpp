@@ -567,6 +567,12 @@ int createTableConditionConvert(string &sql, CreateTable &CT)
 
     int pos_space = sql.find(' ');
 
+	int pos = sql.find(',');
+	while (sql[pos - 1] == ' ')
+	{
+		pos--;
+		sql.erase(pos, 1);
+	}
 	if (pos_space < 0)
 	{
 		cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
