@@ -15,7 +15,7 @@ bool getTableInfo(Table & d)
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {
-        cout << "ERROR 0001: no table named " << d.table_name << endl;
+        cout << "ERROR 1001: no table named " << d.table_name << endl;
         return false;
     }
     int flag = 0;
@@ -231,7 +231,7 @@ bool catalogExecute(CreateIndex &d)
     int judge = x.isIndexExist(d.index_name, d.table_name);
     if (judge == 1)
     {
-        cout << "ERROR: index "<< d.index_name <<" on table " << d.table_name << " is already exist" << endl;
+        cout << "ERROR 1003: index "<< d.index_name <<" on table " << d.table_name << " is already exist" << endl;
         return false;
     }
     x.createIndex(d.index_name, d.table_name, d.index_column_name);
@@ -308,12 +308,6 @@ bool catalogExecute(CreateIndex &d)
 bool catalogExecute(DropIndex &d)
 {
     catalogManager& x = *catalog_manager;
-    int judge = x.isIndexExist(d.index_name, d.table_name);
-    if (judge == 0)
-    {
-        cout << "index not exist" << endl;
-        return false;
-    }
     for (auto& s : x.myt)
     {
         if (s.nameOfTable == d.table_name)
@@ -378,17 +372,18 @@ bool catalogExecute(DropIndex &d)
                     d.all_index_name[i] = s.nameOfIndex[i];//* -> not exist
                 }
             }
-
-
         }
-
-
     }
+    int judge = x.isIndexExist(d.index_name, d.table_name);
+    if (judge != 1)
+    {
+        // cout << "ERROR 1002: index not exist" << endl;
+        return false;
+    }
+    
     x.deleteIndex(d.index_name);
 
-    cout << "delete successfully" << endl;
     return true;
-
 }
 
 bool catalogExecute(Insert &d)

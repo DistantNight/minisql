@@ -1160,9 +1160,15 @@ int dropIndexConvert(string &sql)
 	{
 		temp = sql.substr(0, pos_end);
 		DI.index_name = temp;
-
-		temp = indexExecute(DI);
-		cout << temp << endl;
+        if (catalogExecute(DI))
+        {
+            temp = indexExecute(DI);
+            cout << temp << endl;
+        }
+        else
+        {
+            cout << "Index has been droped successfully" << endl;
+        }
 	}
 	else
 	{
@@ -1175,11 +1181,15 @@ int dropIndexConvert(string &sql)
 			cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
 			return -1;
 		}
-		else
-		{
-			temp = indexExecute(DI);
-			cout << temp << endl;
-		}
+        if (catalogExecute(DI))
+        {
+            temp = indexExecute(DI);
+            cout << temp << endl;
+        }
+        else
+        {
+            cout << "Index has been droped successfully" << endl;
+        }
 	}
 
 	return opt;
