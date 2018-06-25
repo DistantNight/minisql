@@ -1549,12 +1549,13 @@ int selectConditionConvert(string &sql, Select &S)
 	        }
 	        else
 	        {
-	            temp = sql.substr(0, pos_space);
-	            sql.erase(0, pos_space + 1);
-	            removeSpace(sql);
-	            if (temp[0] != '\'')
+				
+	            if (sql[0] != '\'')
 	            {
-	                S.condition_value.push_back(temp);
+					temp = sql.substr(0, pos_space);
+					sql.erase(0, pos_space + 1);
+					removeSpace(sql);
+					S.condition_value.push_back(temp);
 	                S.condition_num++;
 	                if (sql[0] == ';')
 	                {
@@ -1584,14 +1585,16 @@ int selectConditionConvert(string &sql, Select &S)
 	            }
 	            else
 	            {
-	                temp.erase(0, 1);
-	                pos = temp.find('\'');
+					sql.erase(0, 1);
+	                pos = sql.find('\'');
 	                if (pos < 0)
 	                {
 	                    cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
 	                    return -1;
 	                }
-	                temp.erase(pos, 1);
+					temp = sql.substr(0, pos);
+					sql.erase(0, pos + 1);
+					removeSpace(sql);
 	                S.condition_value.push_back(temp);
 	                S.condition_num++;
 	                if (sql[0] == ';')
