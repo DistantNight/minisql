@@ -965,7 +965,7 @@ int deleteConditionConvert(string &sql, Delete &D)
 							}
 							else
 							{
-                                temp = temp.substr(0, pos_end);
+								temp.erase(pos, 1);
 								D.condition_value.push_back(temp);
 								D.condition_num++;
 								break;
