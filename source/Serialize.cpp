@@ -36,9 +36,9 @@ float unpackFloat(const int8_t * source)
 
 std::string unpackString(const int8_t * source, size_t length)
 {
-    auto *str = new char[length];
+    auto *str = new char[length + 1];
     memcpy(str, source, length);
-    str[length - 1] = '\0';
+    str[length] = '\0';
     std::string s(str);
     delete[] str;
     return s;
