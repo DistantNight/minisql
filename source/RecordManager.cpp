@@ -464,7 +464,11 @@ string recordExecute(Select &table)
     // (3) on the column that has an index    
     if (table.condition_num == 1 && table.condition_op.at(0) == "=")
     {
-        const auto i = r.column_name_to_index[table.condition_name.at(0)];
+        if (r.column_name_to_index.find(table.condition_name.at(0)) == r.column_name_to_index.end())
+        {
+            return "ERROR 1552: column name \"" + table.condition_name[0] + "\" doesn't exist in table " + table.table_name;
+        }
+        const auto i = r.column_name_to_index[table.condition_name[0]];
         const auto index_name = table.all_index_name[i];
         if (!index_name.empty()) // the column that has an index 
         {
@@ -539,7 +543,11 @@ string recordExecute(Select &table)
             auto tuple = r.getTuple(tuple_i);
             for (int i = 0; i < table.condition_num; ++i) // examine if this tuple satisfy all the conditions 
             {
-                const auto col_name = table.condition_name.at(i);
+                if (r.column_name_to_index.find(table.condition_name.at(i)) == r.column_name_to_index.end())
+                {
+                    return "ERROR 1552: column name \"" + table.condition_name[i] + "\" doesn't exist in table " + table.table_name;
+                }
+                const auto col_name = table.condition_name[i];
                 const auto col_index = r.column_name_to_index[col_name];
                 //int offset = 1; // the first byte is the valid bit; 
 
@@ -651,6 +659,10 @@ string recordExecute(Delete &table) // delete
     // (3) on the column that has an index   
     if (table.condition_num == 1 && table.condition_op.at(0) == "=")
     {
+        if (r.column_name_to_index.find(table.condition_name.at(0)) == r.column_name_to_index.end())
+        {
+            return "ERROR 1552: column name \"" + table.condition_name[0] + "\" doesn't exist in table " + table.table_name;
+        }
         const auto i = r.column_name_to_index[table.condition_name.at(0)];
         const auto index_name = table.all_index_name[i];
         if (!index_name.empty()) // the column that has an index 
@@ -722,6 +734,10 @@ string recordExecute(Delete &table) // delete
             auto tuple = r.getTuple(tuple_i);
             for (int i = 0; i < table.condition_num; ++i) // examine if this tuple satisfy all the conditions 
             {
+                if (r.column_name_to_index.find(table.condition_name.at(i)) == r.column_name_to_index.end())
+                {
+                    return "ERROR 1552: column name \"" + table.condition_name[i] + "\" doesn't exist in table " + table.table_name;
+                }
                 const auto col_name = table.condition_name.at(i);
                 const auto col_index = r.column_name_to_index[col_name];
 

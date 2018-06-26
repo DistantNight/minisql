@@ -558,7 +558,7 @@ bool catalogExecute(Delete &d)
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {
-        cout << "no table" << endl;
+        cout << "ERROR 1001: no table named " << d.table_name << endl;
         return false;
     }
     for (auto& s : x.myt)
@@ -647,7 +647,7 @@ bool catalogExecute(Select &d)
     const int a = x.isTableExist(d.table_name);
     if (a == 0)
     {
-        cout << "table not exist" << endl;
+        cout << "ERROR 1001: no table named " << d.table_name << endl;
         return false;
     }
     int flag = 0;

@@ -74,22 +74,29 @@ void execInterface()
 
 	while (!isQuit)
 	{
-		string sql_string;
-		cout << "\nMiniSQL> ";
-		getline(cin, sql_string);
-		while (!isSqlEnd(sql_string))
-		{
-			cout << "      -> ";
-			getline(cin, temp);
-			sql_string += space;
-			sql_string += temp;
-		}
-	    const int operation_type = sqlConvert(sql_string);
-		if (operation_type == 60)
-		{
-			isQuit = true;
-			cout << "You quit the MiniSQL." << endl;
-		}
+	    try
+	    {
+            string sql_string;
+            cout << "\nMiniSQL> ";
+            getline(cin, sql_string);
+            while (!isSqlEnd(sql_string))
+            {
+                cout << "      -> ";
+                getline(cin, temp);
+                sql_string += space;
+                sql_string += temp;
+            }
+            const int operation_type = sqlConvert(sql_string);
+            if (operation_type == 60)
+            {
+                isQuit = true;
+                cout << "You quit the MiniSQL." << endl;
+            }
+	    }
+	    catch (...)
+	    {
+            cout << "Some thing was wrong. Windows is looking for solutions...";
+	    }	    
 	}
 }
 

@@ -6,8 +6,8 @@
 
 using std::string;
 
-const int32_t MAX_FILE_ACTIVE = 5;	// limit the acctive files in the buffer
-const int32_t MAX_BLOCK = 40;		// the max number of the blocks
+const int32_t MAX_FILE_ACTIVE = 8;	// limit the active files in the buffer
+const int32_t MAX_BLOCK = 2048;		// the max number of the blocks
 const int32_t BLOCK_LEN = 4096;		// the size of one block
 
 class Buffer;
@@ -23,11 +23,11 @@ class fileInfo {
 	friend class Buffer;
 
 	fileInfo(string file_name, bool type) :
-		file_name(file_name),
 		type(type),
-		lock(0),
-		next(NULL),
-		first_block(NULL) {}
+		file_name(file_name),
+		lock(false),
+		next(nullptr),
+		first_block(nullptr) {}
 };
 
 class blockInfo {
@@ -69,8 +69,8 @@ template<typename T> struct blockList		// for LRU
 	friend class Buffer;
 
 	blockList() :
-		next(NULL),
-		element(NULL) {}
+		element(NULL),
+		next(NULL) {}
 };
 
 class Buffer {

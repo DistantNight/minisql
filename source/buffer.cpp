@@ -10,9 +10,8 @@ const string ROOT = "./data/";
 void blockInfo::block_reset(int32_t block_num, fileInfo* file) {
 	this->block_num = block_num;
 	memset(this->cBlock, 0, BLOCK_LEN);
-	this->block_num = 0;
-	this->dirty = 0;
-	this->lock = 0;
+	this->dirty = false;
+	this->lock = false;
 	this->file = file;
 }
 
@@ -151,32 +150,43 @@ blockInfo* Buffer::get_file_block(string file_name, bool file_type, int block_nu
 				}
 				iter = LRU_cur->element;
 
-				blockInfo* replace_block_pre = iter->file->first_block; //修改被替换文件中的链表
-				blockInfo* replace_block = NULL;
-				for (replace_block = iter->file->first_block; replace_block; replace_block = replace_block->next) {
-					if (replace_block == iter)
-						break;
-					replace_block_pre = replace_block;
+				if (iter->file == file_node)
+				{
+					if (iter->dirty) { //脏数据回写
+						write_back(iter->file->file_name, iter->file->type, iter);
+					}
+					iter->block_reset(block_num, file_node);
 				}
-				if (replace_block_pre == replace_block)
-					iter->file->first_block = replace_block->next;
-				else
-					replace_block_pre->next = replace_block->next;
-				
-				if (iter->dirty) { //脏数据回写
-					write_back(iter->file->file_name, iter->file->type, iter);
-				}
+				else {
+					blockInfo* replace_block_pre = iter->file->first_block; //修改被替换文件中的链表
+					blockInfo* replace_block = NULL;
+					for (replace_block = iter->file->first_block; replace_block; replace_block = replace_block->next) {
+						if (replace_block == iter)
+							break;
+						replace_block_pre = replace_block;
+					}
+					if (replace_block_pre == replace_block)
+						iter->file->first_block = replace_block->next;
+					else
+						replace_block_pre->next = replace_block->next;
 
-				iter->block_reset(block_num, file_node);
-				if (block_pre)
-					block_pre->next = iter;
-				else
-					file_node->first_block = iter;
-				iter->next = NULL;
+					if (iter->dirty) { //脏数据回写
+						write_back(iter->file->file_name, iter->file->type, iter);
+					}
+
+					iter->block_reset(block_num, file_node);
+					if (block_pre)
+						block_pre->next = iter;
+					else
+						file_node->first_block = iter;
+					iter->next = NULL;
+				}
 				//更新LRU_block_list
-				temp->next = LRU_cur;
-				LRU_pre->next = LRU_cur->next;
-				LRU_cur->next = NULL;
+				if (temp != LRU_cur) {
+					temp->next = LRU_cur;
+					LRU_pre->next = LRU_cur->next;
+					LRU_cur->next = NULL;
+				}
 			}
 		}
 		load_data(file_name, file_type, iter);
@@ -213,6 +223,10 @@ void Buffer::load_data(string file_name, bool file_type, blockInfo* block_node) 
 
 		file.close();
 	}
+	else
+	{
+		load_data(file_name, file_type, block_node);
+	}
 }
 
 void Buffer::close_file(fileInfo* file_node) {
@@ -239,11 +253,16 @@ void Buffer::close_file(fileInfo* file_node) {
 void Buffer::write_back(string file_name, bool file_type, blockInfo* block_node) {
 	fstream file;
 	file.open(ROOT + (file_type ? "index/" : "record/") + file_name, ios::in | ios::out | ios::binary);
+	if (file.is_open()) {
+		file.seekp(block_node->block_num * BLOCK_LEN, ios::beg);
+		file.write(block_node->cBlock, BLOCK_LEN);
 
-	file.seekp(block_node->block_num * BLOCK_LEN, ios::beg);
-	file.write(block_node->cBlock, BLOCK_LEN);
-
-	file.close();
+		file.close();
+	}
+	else
+	{
+		write_back(file_name, file_type, block_node);
+	}
 }
 
 void Buffer::set_dirty(blockInfo* block_node, bool dirty) {

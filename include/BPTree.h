@@ -103,15 +103,18 @@ BPT_Node<T>::BPT_Node(int degree, bool is_leaf) :
     is_leaf(is_leaf),
     num_of_key(0),
     parent(nullptr),
-    next(nullptr)
+    next(nullptr),
+    keys(degree + 1),
+    values(degree + 1),
+    childs(degree + 2)
 {
-    for (int i = 0; i < degree + 1; i++)
-    {
-        childs.push_back(NULL);
-        keys.push_back(T());
-        values.push_back(int());
-    }
-    childs.push_back(NULL);
+    //for (int i = 0; i < degree + 1; i++)
+    //{
+    //    childs.push_back(NULL);
+    //    keys.push_back(T());
+    //    values.push_back(int());
+    //}
+    //childs.push_back(NULL);
 }
 
 template <class T>
