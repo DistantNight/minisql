@@ -21,7 +21,6 @@ class fileInfo
 	bool type; // 0-> data file， 1 -> index file
 	string file_name; // the name of the file
 	bool lock; // prevent the block from replacing
-//	fileInfo* next; // the pointer points to the next file
 	std::list<blockInfo*> block_list; // point to the first block within the file
 
 	friend class Buffer;
@@ -47,7 +46,6 @@ class blockInfo
 		lock(false),
 		file(file),
 		dirty(false),
-	//	next(nullptr),
 		char_num(0)
 	{
 		cBlock = new char[BLOCK_LEN];
@@ -93,6 +91,8 @@ private:
 
 	int32_t total_block;
 	int32_t total_file;
+
+	static int count;
 
 	/*
 	function:
@@ -195,6 +195,8 @@ public:
 	 * \param file_type 文件类型
 	 */
 	void remove_file(const string& file_name, bool file_type);
+
+	void flash_blocks();
 };
 
 #endif

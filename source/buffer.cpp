@@ -2,10 +2,13 @@
 #include <fstream>
 #include <cstdlib>
 #include <stdexcept>
+#include "catalog.h"
 
 using std::fstream;
 using std::ios;
 const string ROOT = "./data/";
+extern catalogManager *catalog_manager;
+int Buffer::count = 0;
 
 void blockInfo::block_reset(int32_t block_num, fileInfo* file)
 {
@@ -99,6 +102,8 @@ fileInfo* Buffer::get_file_info(const string& file_name, bool file_type)
 
 blockInfo* Buffer::get_file_block(const string& file_name, bool file_type, int block_num)
 {
+	count++;
+
 	fileInfo* file_node = get_file_info(file_name, file_type);
 	blockInfo* iter = nullptr;
 
@@ -119,7 +124,7 @@ blockInfo* Buffer::get_file_block(const string& file_name, bool file_type, int b
 			iter = block_handle.back();
 			iter->block_reset(block_num, file_node);
 			file_node->block_list.push_back(iter);
-            block_handle.remove(iter);
+			block_handle.remove(iter);
 			LRU_block_list.push_back(iter);
 		}
 		else
@@ -129,7 +134,7 @@ blockInfo* Buffer::get_file_block(const string& file_name, bool file_type, int b
 				//可以新建块
 
 				iter = new blockInfo(block_num, file_node);
-                file_node->block_list.push_back(iter);
+				file_node->block_list.push_back(iter);
 				//更新LRU_block_list
 				LRU_block_list.push_back(iter);
 
@@ -188,6 +193,10 @@ blockInfo* Buffer::get_file_block(const string& file_name, bool file_type, int b
 	}
 
 	//读取磁盘数据到iter
+	if (count > 100)
+	{
+		flash_blocks();
+	}
 	return iter;
 }
 
@@ -227,6 +236,8 @@ void Buffer::close_file(fileInfo* file_node)
 	}
 
 	file_node->block_list.clear();
+
+	//file_handle.remove(file_node);
 }
 
 void Buffer::write_back(const string& file_name, bool file_type, blockInfo* block_node)
@@ -272,16 +283,29 @@ void Buffer::remove_file(const string& file_name, bool file_type)
 	remove((ROOT + (file_type ? "index/" : "record/") + file_name).c_str());
 }
 
+void Buffer::flash_blocks()
+{
+	for (auto &temp:LRU_block_list)
+	{
+		if (temp->dirty)
+		{
+			write_back(temp->file->file_name, temp->file->type, temp);
+			set_dirty(temp, false);
+		}
+	}
+	count = 0;
+
+}
+
 Buffer::~Buffer()
 {
 	for (auto &temp : file_handle)
 	{
 		close_file(temp);
-        delete temp;
+		delete (temp);
 	}
-
-    for (auto &temp:block_handle)
-    {
-        delete temp;
-    }
+	for (auto &temp: block_handle)
+	{
+		delete (temp);
+	}
 }
