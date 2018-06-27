@@ -29,13 +29,16 @@ public:
     void setEndofTupleOffset(int offset) const;
     int getTuplesPerPage() const;
     bool haveSpaceToInsert() const;
+
     void toNextPage();
     void toPreviousPage();
     int getCurrentPageIndex() const
     {
         return current_page_index_;
     }
-    void setCurrentPageIndex(int i);
+    void gotoPage(int i);
+    int getLastPageIndex(); 
+    void setLastPageIndex(int i);
 
     std::vector<std::string> getTuple(const int tuple_i) const;
     bool tupleHasBeenDeleted(int tuple_i) const;

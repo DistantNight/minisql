@@ -62,7 +62,7 @@ IndexManager::~IndexManager()
 void IndexManager::createIndex(const std::string& file_path, COLUMNTYPE type, int string_len)
 {
     const int degree = getBestDegree(type, string_len);
-	
+    //const int degree = 32;
 	if(type == INT)
 	{
 		BPTree<int> *BPT = new BPTree<int>(file_path, degree);
@@ -127,7 +127,7 @@ void IndexManager::dropIndex(const std::string& file_path, COLUMNTYPE type)
 
 int IndexManager::getBestDegree(COLUMNTYPE type, int string_len)
 {
-	int degree = (BLOCK_LEN - sizeof(int)) / (string_len + sizeof(int));
+	int degree = (BLOCK_LEN) / (string_len + sizeof(int) + sizeof(int));
 	if(degree % 2 == 0) degree--;
 	return degree;
 }

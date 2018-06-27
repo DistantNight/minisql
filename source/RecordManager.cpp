@@ -98,7 +98,7 @@ bool RecordManager::isEmptyPage() const
 
 void RecordManager::addMetadataToPage() const
 {
-    memory_page_[164] = 1; // the first page of this table
+    memory_page_[164] = 1; // page in not empty
     int8_t * offset_current = memory_page_; // a pointer point to current location;
     pack(table_.table_name, offset_current);
     offset_current += 160;
@@ -192,8 +192,14 @@ bool RecordManager::haveSpaceToInsert() const
     return end() + tuple_size < memory_page_ + page_size;
 }
 
-void RecordManager::setCurrentPageIndex(int i)
+void RecordManager::gotoPage(int i)
 {
+    if (i < 0)
+    {
+        current_page_index_ = -1;
+        memory_page_ = nullptr;
+        return;
+    }
     current_page_index_ = i;
     const auto page = database->get_file_block(table_.table_name, false, current_page_index_);
     memory_page_ = reinterpret_cast<int8_t*> (database->get_content(page));
@@ -201,6 +207,25 @@ void RecordManager::setCurrentPageIndex(int i)
     {
         throw runtime_error("Unable to read database file");
     }
+}
+
+int RecordManager::getLastPageIndex()
+{
+    const int current_page_index = current_page_index_;
+    gotoPage(0);
+    const int last_page_index = unpackInt(memory_page_ + 170);
+    gotoPage(current_page_index);
+    return last_page_index;
+}
+
+void RecordManager::setLastPageIndex(int i)
+{
+    const int current_page_index = current_page_index_;
+    gotoPage(0);
+    pack(i, memory_page_ + 170);
+    tellBufferPageHasChanged(); // page 0 has changed
+
+    gotoPage(current_page_index);
 }
 
 std::vector<std::string> RecordManager::getTuple(const int tuple_i) const
@@ -293,8 +318,15 @@ string recordExecute(Insert &table)
     }
     RecordManager r(table);
     // ReSharper disable once CppInitializedValueIsAlwaysRewritten
-    bool still_need_check_unique_constraint = true;
-
+    bool still_need_check_unique_constraint = false;
+    for (int i = 0; i < table.value_num; ++i)
+    {
+        if (table.is_unique[i])
+        {
+            still_need_check_unique_constraint = true;
+            break;
+        }
+    }
 #ifdef USE_INDEX
     IndexManager index_manager(table);
     still_need_check_unique_constraint = false;
@@ -336,6 +368,18 @@ string recordExecute(Insert &table)
         }
     }
 #endif
+    if (!still_need_check_unique_constraint) // O(1) insertion
+    {
+        r.gotoPage(0);
+        if (r.isEmptyPage())
+        {
+            r.gotoPage(-1); // empty table, first insertion
+        }
+        else
+        {
+            r.gotoPage(r.getLastPageIndex() - 1);
+        }
+    }
 
     while (true)
     {
@@ -402,7 +446,7 @@ string recordExecute(Insert &table)
                 const int new_end_of_tuple_offset = r.getEndofTupleOffset() + r.tuple_size;
                 r.setEndofTupleOffset(new_end_of_tuple_offset);
                 r.tellBufferPageHasChanged();
-
+                r.setLastPageIndex(r.getCurrentPageIndex());
                 return std::string("Query OK, 1 row affected");
             }
         }
@@ -512,7 +556,7 @@ string recordExecute(Select &table)
                 query_result << table_border.str() << "\n0 row in set";
                 return query_result.str();
             }
-            r.setCurrentPageIndex(page_num);
+            r.gotoPage(page_num);
             select_finish = true;
         }
 
@@ -693,7 +737,7 @@ string recordExecute(Delete &table) // delete
             {
                 return "Query OK, 0 row affected";
             }
-            r.setCurrentPageIndex(page_num);
+            r.gotoPage(page_num);
 
             for (int j = 0; j < r.getEndofTupleOffset() - 192 / r.tuple_size; ++j)
             {
