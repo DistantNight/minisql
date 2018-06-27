@@ -927,239 +927,126 @@ int deleteConditionConvert(string &sql, Delete &D)
 	removeSpace(sql);
 	while (true)
 	{
-		pos_and = sql.find(lag_and);
-		pos_end = sql.find(';');
-		if (pos_and >= 0)
+		temp_name.assign("");
+		temp_op.assign("");
+		temp_value.assign("");
+		while (!(sql[0] == ' ' || sql[0] == '>' || sql[0] == '<' || sql[0] == '=' || sql[0] == ';'))
 		{
-			temp = sql.substr(0, pos_and);
-			sql.erase(0, pos_and + 3);
-			removeSpace(sql);
-			pos_and--;
-			while (temp[pos_and] == ' ')
+			temp_name.append(1, sql[0]);
+			sql.erase(0, 1);
+		}
+		removeSpace(sql);
+		if (sql[0] == '>')
+		{
+			if (sql[1] == '=')
 			{
-				temp.erase(pos_and, 1);
-				pos_and--;
-			}
-			removeSpace(temp);
-			if (temp.empty())
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			if ((pos_temp = temp.find(lag_op_2)) > 0)
-			{
-				pos = temp.find(lag_op_2);
-				temp_op = lag_op_2;
+				temp_op.assign(">=");
 				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_5)) > 0)
-			{
-				pos = temp.find(lag_op_5);
-				temp_op = lag_op_5;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_6)) > 0)
-			{
-				pos = temp.find(lag_op_6);
-				temp_op = lag_op_6;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_1)) > 0)
-			{
-				pos = temp.find(lag_op_1);
-				temp_op = lag_op_1;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_3)) > 0)
-			{
-				pos = temp.find(lag_op_3);
-				temp_op = lag_op_3;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_4)) > 0)
-			{
-				pos = temp.find(lag_op_4);
-				temp_op = lag_op_4;
-				op_length = 1;
 			}
 			else
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
+				temp_op.assign(">");
+				op_length = 1;
 			}
-			temp_name = temp.substr(0, pos);
-			temp.erase(0, pos + op_length);
-			temp_value = temp;
-			removeSpace(temp_name);
-			removeSpace(temp_value);
-			pos_end = temp_name.length() - 1;
-			while (temp_name[pos_end] == ' ')
+		}
+		else if (sql[0] == '<')
+		{
+			if (sql[1] == '=')
 			{
-				temp_name.erase(pos_end, 1);
-				pos_end--;
+				temp_op.assign("<=");
+				op_length = 2;
 			}
-			pos = temp_name.find(' ');
-			if (pos >= 0)
+			else if (sql[1] == '>')
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			pos_end = temp_value.length() - 1;
-			while (temp_value[pos_end] == ' ')
-			{
-				temp_value.erase(pos_end, 1);
-				pos_end--;
-			}
-			if (temp_value[0] == '\'')
-			{
-				temp_value.erase(0, 1);
-				pos = temp_value.find('\'');
-				if (pos >= 0)
-				{
-					temp = temp_value.substr(0, pos);
-					temp_value.erase(0, pos + 1);
-					if (!temp_value.empty())
-					{
-						cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-						return -1;
-					}
-					temp_value = temp;
-				}
-				else
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_op.assign("<>");
+				op_length = 2;
 			}
 			else
 			{
-				pos = temp_value.find(' ');
-				if (pos >= 0)
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_op.assign("<");
+				op_length = 1;
 			}
-			D.condition_name.push_back(temp_name);
-			D.condition_op.push_back(temp_op);
-			D.condition_value.push_back(temp_value);
-			D.condition_num++;
+		}
+		else if (sql[0] == '=')
+		{
+			temp_op.assign("=");
+			op_length = 1;
 		}
 		else
 		{
-			temp = sql.substr(0, pos_end);
-			pos_end--;
-			while (temp[pos_end] == ' ')
+			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+			return -1;
+		}
+		sql.erase(0, op_length);
+		removeSpace(sql);
+		if (sql[0] == '\'')
+		{
+			sql.erase(0, 1);
+			pos = sql.find('\'');
+			if (pos < 0)
 			{
-				temp.erase(pos_end, 1);
-				pos_end--;
-			}
-			removeSpace(temp);
-			if (temp.empty())
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
+				cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
 				return -1;
-			}
-			if ((pos_temp = temp.find(lag_op_2)) > 0)
-			{
-				pos = temp.find(lag_op_2);
-				temp_op = lag_op_2;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_5)) > 0)
-			{
-				pos = temp.find(lag_op_5);
-				temp_op = lag_op_5;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_6)) > 0)
-			{
-				pos = temp.find(lag_op_6);
-				temp_op = lag_op_6;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_1)) > 0)
-			{
-				pos = temp.find(lag_op_1);
-				temp_op = lag_op_1;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_3)) > 0)
-			{
-				pos = temp.find(lag_op_3);
-				temp_op = lag_op_3;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_4)) > 0)
-			{
-				pos = temp.find(lag_op_4);
-				temp_op = lag_op_4;
-				op_length = 1;
 			}
 			else
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			temp_name = temp.substr(0, pos);
-			temp.erase(0, pos + op_length);
-			temp_value = temp;
-			removeSpace(temp_name);
-			removeSpace(temp_value);
-			pos_end = temp_name.length() - 1;
-			while (temp_name[pos_end] == ' ')
-			{
-				temp_name.erase(pos_end, 1);
-				pos_end--;
-			}
-			pos = temp_name.find(' ');
-			if (pos >= 0)
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			pos_end = temp_value.length() - 1;
-			while (temp_value[pos_end] == ' ')
-			{
-				temp_value.erase(pos_end, 1);
-				pos_end--;
-			}
-			if (temp_value[0] == '\'')
-			{
-				temp_value.erase(0, 1);
-				pos = temp_value.find('\'');
-				if (pos >= 0)
+				temp_value = sql.substr(0, pos);
+				sql.erase(0, pos + 1);
+				removeSpace(sql);
+				D.condition_name.push_back(temp_name);
+				D.condition_op.push_back(temp_op);
+				D.condition_value.push_back(temp_value);
+				D.condition_num++;
+				if (sql[0] == ';')
 				{
-					temp = temp_value.substr(0, pos);
-					temp_value.erase(0, pos + 1);
-					if (!temp_value.empty())
-					{
-						cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-						return -1;
-					}
-					temp_value = temp;
+					break;
 				}
 				else
 				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
+					if (sql.substr(0, 3) == lag_and)
+					{
+						sql.erase(0, 3);
+						removeSpace(sql);
+					}
+					else
+					{
+						cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+						return -1;
+					}
 				}
 			}
-			else
+		}
+		else
+		{
+			while (!(sql[0] == ' ' || sql[0] == ';'))
 			{
-				pos = temp_value.find(' ');
-				if (pos >= 0)
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_value.append(1, sql[0]);
+				sql.erase(0, 1);
 			}
+			removeSpace(sql);
 			D.condition_name.push_back(temp_name);
 			D.condition_op.push_back(temp_op);
 			D.condition_value.push_back(temp_value);
 			D.condition_num++;
-			break;
+			if (sql[0] == ';')
+			{
+				break;
+			}
+			else
+			{
+				if (sql.substr(0, 3) == lag_and)
+				{
+					sql.erase(0, 3);
+					removeSpace(sql);
+				}
+				else
+				{
+					cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+					return -1;
+				}
+			}
 		}
+
 	}
 	return opt;
 }
@@ -1591,239 +1478,126 @@ int selectConditionConvert(string &sql, Select &S)
 	removeSpace(sql);
 	while (true)
 	{
-		pos_and = sql.find(lag_and);
-		pos_end = sql.find(';');
-		if (pos_and >= 0)
+		temp_name.assign("");
+		temp_op.assign("");
+		temp_value.assign("");
+		while (!(sql[0] == ' ' || sql[0] == '>' || sql[0] == '<' || sql[0] == '=' || sql[0] == ';'))
 		{
-			temp = sql.substr(0, pos_and);
-			sql.erase(0, pos_and + 3);
-			removeSpace(sql);
-			pos_and--;
-			while (temp[pos_and] == ' ')
+			temp_name.append(1, sql[0]);
+			sql.erase(0, 1);
+		}
+		removeSpace(sql);
+		if (sql[0] == '>')
+		{
+			if (sql[1] == '=')
 			{
-				temp.erase(pos_and, 1);
-				pos_and--;
-			}
-			removeSpace(temp);
-			if (temp.empty())
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			if ((pos_temp = temp.find(lag_op_2)) > 0)
-			{
-				pos = temp.find(lag_op_2);
-				temp_op = lag_op_2;
+				temp_op.assign(">=");
 				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_5)) > 0)
-			{
-				pos = temp.find(lag_op_5);
-				temp_op = lag_op_5;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_6)) > 0)
-			{
-				pos = temp.find(lag_op_6);
-				temp_op = lag_op_6;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_1)) > 0)
-			{
-				pos = temp.find(lag_op_1);
-				temp_op = lag_op_1;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_3)) > 0)
-			{
-				pos = temp.find(lag_op_3);
-				temp_op = lag_op_3;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_4)) > 0)
-			{
-				pos = temp.find(lag_op_4);
-				temp_op = lag_op_4;
-				op_length = 1;
 			}
 			else
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
+				temp_op.assign(">");
+				op_length = 1;
 			}
-			temp_name = temp.substr(0, pos);
-			temp.erase(0, pos + op_length);
-			temp_value = temp;
-			removeSpace(temp_name);
-			removeSpace(temp_value);
-			pos_end = temp_name.length() - 1;
-			while (temp_name[pos_end] == ' ')
+		}
+		else if (sql[0] == '<')
+		{
+			if (sql[1] == '=')
 			{
-				temp_name.erase(pos_end, 1);
-				pos_end--;
+				temp_op.assign("<=");
+				op_length = 2;
 			}
-			pos = temp_name.find(' ');
-			if (pos >= 0)
+			else if (sql[1] == '>')
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			pos_end = temp_value.length() - 1;
-			while (temp_value[pos_end] == ' ')
-			{
-				temp_value.erase(pos_end, 1);
-				pos_end--;
-			}
-			if (temp_value[0] == '\'')
-			{
-				temp_value.erase(0, 1);
-				pos = temp_value.find('\'');
-				if (pos >= 0)
-				{
-					temp = temp_value.substr(0, pos);
-					temp_value.erase(0, pos + 1);
-					if (!temp_value.empty())
-					{
-						cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-						return -1;
-					}
-					temp_value = temp;
-				}
-				else
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_op.assign("<>");
+				op_length = 2;
 			}
 			else
 			{
-				pos = temp_value.find(' ');
-				if (pos >= 0)
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_op.assign("<");
+				op_length = 1;
 			}
-			S.condition_name.push_back(temp_name);
-			S.condition_op.push_back(temp_op);
-			S.condition_value.push_back(temp_value);
-			S.condition_num++;
+		}
+		else if (sql[0] == '=')
+		{
+			temp_op.assign("=");
+			op_length = 1;
 		}
 		else
 		{
-			temp = sql.substr(0, pos_end);
-			pos_end--;
-			while (temp[pos_end] == ' ')
+			cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+			return -1;
+		}
+		sql.erase(0, op_length);
+		removeSpace(sql);
+		if (sql[0] == '\'')
+		{
+			sql.erase(0, 1);
+			pos = sql.find('\'');
+			if (pos < 0)
 			{
-				temp.erase(pos_end, 1);
-				pos_end--;
-			}
-			removeSpace(temp);
-			if (temp.empty())
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
+				cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
 				return -1;
-			}
-			if ((pos_temp = temp.find(lag_op_2)) > 0)
-			{
-				pos = temp.find(lag_op_2);
-				temp_op = lag_op_2;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_5)) > 0)
-			{
-				pos = temp.find(lag_op_5);
-				temp_op = lag_op_5;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_6)) > 0)
-			{
-				pos = temp.find(lag_op_6);
-				temp_op = lag_op_6;
-				op_length = 2;
-			}
-			else if ((pos_temp = temp.find(lag_op_1)) > 0)
-			{
-				pos = temp.find(lag_op_1);
-				temp_op = lag_op_1;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_3)) > 0)
-			{
-				pos = temp.find(lag_op_3);
-				temp_op = lag_op_3;
-				op_length = 1;
-			}
-			else if ((pos_temp = temp.find(lag_op_4)) > 0)
-			{
-				pos = temp.find(lag_op_4);
-				temp_op = lag_op_4;
-				op_length = 1;
 			}
 			else
 			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			temp_name = temp.substr(0, pos);
-			temp.erase(0, pos + op_length);
-			temp_value = temp;
-			removeSpace(temp_name);
-			removeSpace(temp_value);
-			pos_end = temp_name.length() - 1;
-			while (temp_name[pos_end] == ' ')
-			{
-				temp_name.erase(pos_end, 1);
-				pos_end--;
-			}
-			pos = temp_name.find(' ');
-			if (pos >= 0)
-			{
-				cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-				return -1;
-			}
-			pos_end = temp_value.length() - 1;
-			while (temp_value[pos_end] == ' ')
-			{
-				temp_value.erase(pos_end, 1);
-				pos_end--;
-			}
-			if (temp_value[0] == '\'')
-			{
-				temp_value.erase(0, 1);
-				pos = temp_value.find('\'');
-				if (pos >= 0)
+				temp_value = sql.substr(0, pos);
+				sql.erase(0, pos + 1);
+				removeSpace(sql);
+				S.condition_name.push_back(temp_name);
+				S.condition_op.push_back(temp_op);
+				S.condition_value.push_back(temp_value);
+				S.condition_num++;
+				if (sql[0] == ';')
 				{
-					temp = temp_value.substr(0, pos);
-					temp_value.erase(0, pos + 1);
-					if (!temp_value.empty())
-					{
-						cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-						return -1;
-					}
-					temp_value = temp;
+					break;
 				}
 				else
 				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
+					if (sql.substr(0, 3) == lag_and)
+					{
+						sql.erase(0, 3);
+						removeSpace(sql);
+					}
+					else
+					{
+						cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+						return -1;
+					}
 				}
 			}
-			else
+		}
+		else
+		{
+			while (!(sql[0] == ' ' || sql[0] == ';'))
 			{
-				pos = temp_value.find(' ');
-				if (pos >= 0)
-				{
-					cout << "ERROR 0000: You have an error in your SQL syntax." << endl;
-					return -1;
-				}
+				temp_value.append(1, sql[0]);
+				sql.erase(0, 1);
 			}
+			removeSpace(sql);
 			S.condition_name.push_back(temp_name);
 			S.condition_op.push_back(temp_op);
 			S.condition_value.push_back(temp_value);
 			S.condition_num++;
-			break;
+			if (sql[0] == ';')
+			{
+				break;
+			}
+			else
+			{
+				if (sql.substr(0, 3) == lag_and)
+				{
+					sql.erase(0, 3);
+					removeSpace(sql);
+				}
+				else
+				{
+					cout << "ERROR 00001: You have an error in your SQL syntax." << endl;
+					return -1;
+				}
+			}
 		}
+
 	}
 	return opt;
 }
